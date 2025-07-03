@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import jsPDF from 'jspdf';
 import { 
   FileText, 
   Download, 
@@ -128,54 +129,107 @@ export const ReportsView = ({ userRole }: ReportsViewProps) => {
   const handleExportPDF = (reportId: number) => {
     const report = reports.find(r => r.id === reportId);
     if (report) {
-      const pdfContent = `
-        BÁAO CÁO CHẨN ĐOÁN XÉT NGHIỆM CHI TIẾT
-        ======================================
-        
-        THÔNG TIN BỆNH NHÂN:
-        - Họ tên: ${report.patientName}
-        - Mã bệnh nhân: ${report.patientCode}
-        - Mã xét nghiệm: ${report.testCode}
-        - Thời gian xét nghiệm: ${report.testDateTime}
-        - Thời gian chẩn đoán: ${report.diagnosisDateTime}
-        
-        KẾT QUẢ CHẨN ĐOÁN:
-        - Chẩn đoán chính: ${report.primaryDiagnosis}
-        - Điểm nguy cơ: ${report.riskScore}/100
-        - Mức độ nguy cơ: ${report.riskLevel === 'high' ? 'CAO' : report.riskLevel === 'medium' ? 'TRUNG BÌNH' : 'THẤP'}
-        
-        CHI TIẾT CÁC CHỈ SỐ SINH HỌC:
-        ${Object.entries(report.biomarkers).map(([key, marker]) => 
-          `- ${key.toUpperCase()}: ${marker.value} (Bình thường: ${marker.normal}) - Trạng thái: ${marker.status === 'high' ? 'CAO' : marker.status === 'low' ? 'THẤP' : 'BÌNH THƯỜNG'}`
-        ).join('\n        ')}
-        
-        KHUYẾN NGHỊ XỬ LÝ CHI TIẾT:
-        ${report.recommendations.map((rec, index) => `${index + 1}. ${rec}`).join('\n        ')}
-        
-        PHÂN TÍCH NGUY CƠ:
-        - Số chỉ số bất thường: ${Object.values(report.biomarkers).filter(m => m.status !== 'normal').length}
-        - Các chỉ số vượt ngưỡng: ${Object.entries(report.biomarkers).filter(([_, m]) => m.status !== 'normal').map(([key, _]) => key.toUpperCase()).join(', ')}
-        
-        GHI CHÚ QUAN TRỌNG:
-        - Báo cáo này chỉ mang tính chất tham khảo
-        - Cần kết hợp với thăm khám lâm sàng để có chẩn đoán chính xác
-        - Liên hệ bác sĩ điều trị để được tư vấn cụ thể
-        
-        ======================================
-        Báo cáo được tạo bởi SLSS Gentis
-        Ngày tạo: ${new Date().toLocaleString('vi-VN')}
-        Người tạo: Bác sĩ ${userRole === 'collaborator' ? 'Cộng tác' : 'Chính'}
-      `;
-
-      const blob = new Blob([pdfContent], { type: 'text/plain;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `BaoCaoChiTiet_${report.patientCode}_${report.date}.txt`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      const pdf = new jsPDF();
+      const pageHeight = pdf.internal.pageSize.height;
+      let yPosition = 20;
+      
+      // Title
+      pdf.setFontSize(16);
+      pdf.text('BAO CAO CHAN DOAN XET NGHIEM CHI TIET', 20, yPosition);
+      yPosition += 20;
+      
+      // Patient Info
+      pdf.setFontSize(12);
+      pdf.text('THONG TIN BENH NHAN:', 20, yPosition);
+      yPosition += 10;
+      
+      pdf.setFontSize(10);
+      pdf.text(`Ho ten: ${report.patientName}`, 20, yPosition);
+      yPosition += 6;
+      pdf.text(`Ma benh nhan: ${report.patientCode}`, 20, yPosition);
+      yPosition += 6;
+      pdf.text(`Ma xet nghiem: ${report.testCode}`, 20, yPosition);
+      yPosition += 6;
+      pdf.text(`Thoi gian xet nghiem: ${report.testDateTime}`, 20, yPosition);
+      yPosition += 6;
+      pdf.text(`Thoi gian chan doan: ${report.diagnosisDateTime}`, 20, yPosition);
+      yPosition += 15;
+      
+      // Diagnosis
+      pdf.setFontSize(12);
+      pdf.text('KET QUA CHAN DOAN:', 20, yPosition);
+      yPosition += 10;
+      
+      pdf.setFontSize(10);
+      pdf.text(`Chan doan chinh: ${report.primaryDiagnosis}`, 20, yPosition);
+      yPosition += 6;
+      pdf.text(`Diem nguy co: ${report.riskScore}/100`, 20, yPosition);
+      yPosition += 6;
+      const riskLevelText = report.riskLevel === 'high' ? 'CAO' : report.riskLevel === 'medium' ? 'TRUNG BINH' : 'THAP';
+      pdf.text(`Muc do nguy co: ${riskLevelText}`, 20, yPosition);
+      yPosition += 15;
+      
+      // Biomarkers
+      pdf.setFontSize(12);
+      pdf.text('CHI TIET CAC CHI SO SINH HOC:', 20, yPosition);
+      yPosition += 10;
+      
+      pdf.setFontSize(10);
+      Object.entries(report.biomarkers).forEach(([key, marker]) => {
+        if (yPosition > pageHeight - 20) {
+          pdf.addPage();
+          yPosition = 20;
+        }
+        const statusText = marker.status === 'high' ? 'CAO' : marker.status === 'low' ? 'THAP' : 'BINH THUONG';
+        pdf.text(`- ${key.toUpperCase()}: ${marker.value} (BT: ${marker.normal}) - ${statusText}`, 20, yPosition);
+        yPosition += 6;
+      });
+      
+      yPosition += 10;
+      
+      // Recommendations
+      pdf.setFontSize(12);
+      pdf.text('KHUYEN NGHI XU LY CHI TIET:', 20, yPosition);
+      yPosition += 10;
+      
+      pdf.setFontSize(10);
+      report.recommendations.forEach((rec, index) => {
+        if (yPosition > pageHeight - 20) {
+          pdf.addPage();
+          yPosition = 20;
+        }
+        pdf.text(`${index + 1}. ${rec}`, 20, yPosition);
+        yPosition += 6;
+      });
+      
+      yPosition += 10;
+      
+      // Risk Analysis
+      const abnormalCount = Object.values(report.biomarkers).filter(m => m.status !== 'normal').length;
+      const abnormalNames = Object.entries(report.biomarkers)
+        .filter(([_, m]) => m.status !== 'normal')
+        .map(([key, _]) => key.toUpperCase())
+        .join(', ');
+      
+      pdf.setFontSize(12);
+      pdf.text('PHAN TICH NGUY CO:', 20, yPosition);
+      yPosition += 10;
+      
+      pdf.setFontSize(10);
+      pdf.text(`So chi so bat thuong: ${abnormalCount}`, 20, yPosition);
+      yPosition += 6;
+      pdf.text(`Cac chi so vuot nguong: ${abnormalNames}`, 20, yPosition);
+      yPosition += 15;
+      
+      // Footer
+      pdf.setFontSize(8);
+      pdf.text('Bao cao duoc tao boi SLSS Gentis', 20, yPosition);
+      yPosition += 5;
+      pdf.text(`Ngay tao: ${new Date().toLocaleString('vi-VN')}`, 20, yPosition);
+      yPosition += 5;
+      pdf.text(`Nguoi tao: Bac si ${userRole === 'collaborator' ? 'Cong tac' : 'Chinh'}`, 20, yPosition);
+      
+      pdf.save(`BaoCaoChiTiet_${report.patientCode}_${report.date}.pdf`);
       
       toast({
         title: "Xuất báo cáo chi tiết thành công",

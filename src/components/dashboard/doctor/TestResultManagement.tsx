@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import jsPDF from 'jspdf';
 import { 
   Search, 
   Download,
@@ -282,19 +283,85 @@ export const TestResultManagement = ({ userRole }: TestResultManagementProps) =>
       Ngày tạo: ${new Date().toLocaleString('vi-VN')}
     `;
 
-    const blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `BaoCao_${testResult.testCode}.txt`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    const pdf = new jsPDF();
+    const pageHeight = pdf.internal.pageSize.height;
+    let yPosition = 20;
+    
+    // Title
+    pdf.setFontSize(16);
+    pdf.text('BAO CAO KET QUA XET NGHIEM', 20, yPosition);
+    yPosition += 20;
+    
+    // Basic Info
+    pdf.setFontSize(12);
+    pdf.text('THONG TIN XET NGHIEM:', 20, yPosition);
+    yPosition += 10;
+    
+    pdf.setFontSize(10);
+    pdf.text(`Ma so mau: ${testResult.testCode}`, 20, yPosition);
+    yPosition += 6;
+    pdf.text(`Ho ten: ${testResult.patientName}`, 20, yPosition);
+    yPosition += 6;
+    pdf.text(`Ngay sinh: ${testResult.birthDate}`, 20, yPosition);
+    yPosition += 6;
+    pdf.text(`So dien thoai: ${testResult.phone}`, 20, yPosition);
+    yPosition += 6;
+    pdf.text(`Chi nhanh: ${testResult.branch}`, 20, yPosition);
+    yPosition += 6;
+    pdf.text(`Ngay xet nghiem: ${testResult.testDate}`, 20, yPosition);
+    yPosition += 6;
+    pdf.text(`Ngay phan tich: ${testResult.analysisDate}`, 20, yPosition);
+    yPosition += 15;
+    
+    // Results
+    pdf.setFontSize(12);
+    pdf.text('KET QUA:', 20, yPosition);
+    yPosition += 10;
+    
+    pdf.setFontSize(10);
+    pdf.text(`Ket qua: ${testResult.result === 'positive' ? 'Duong tinh' : 'Am tinh'}`, 20, yPosition);
+    yPosition += 6;
+    pdf.text(`Chan doan: ${testResult.diagnosis}`, 20, yPosition);
+    yPosition += 15;
+    
+    // Biomarkers
+    pdf.setFontSize(12);
+    pdf.text('CHI SO SINH HOC:', 20, yPosition);
+    yPosition += 10;
+    
+    pdf.setFontSize(10);
+    Object.entries(testResult.biomarkers).forEach(([key, marker]: [string, any]) => {
+      if (yPosition > pageHeight - 20) {
+        pdf.addPage();
+        yPosition = 20;
+      }
+      const statusText = marker.status === 'high' ? 'Cao' : marker.status === 'low' ? 'Thap' : 'Binh thuong';
+      pdf.text(`- ${key.toUpperCase()}: ${marker.value} (BT: ${marker.normal}) - ${statusText}`, 20, yPosition);
+      yPosition += 5;
+    });
+    
+    yPosition += 10;
+    
+    // Doctor Conclusion
+    pdf.setFontSize(12);
+    pdf.text('KET LUAN BAC SI:', 20, yPosition);
+    yPosition += 10;
+    
+    pdf.setFontSize(10);
+    pdf.text(testResult.doctorConclusion || 'Chua co ket luan', 20, yPosition);
+    yPosition += 15;
+    
+    // Footer
+    pdf.setFontSize(8);
+    pdf.text('Bao cao duoc tao boi SLSS Gentis', 20, yPosition);
+    yPosition += 5;
+    pdf.text(`Ngay tao: ${new Date().toLocaleString('vi-VN')}`, 20, yPosition);
+    
+    pdf.save(`BaoCao_${testResult.testCode}.pdf`);
     
     toast({
       title: "Tải xuống thành công",
-      description: `Báo cáo xét nghiệm ${testResult.testCode} đã được tải xuống`,
+      description: `Báo cáo xét nghiệm ${testResult.testCode} đã được tải xuống PDF`,
     });
   };
 

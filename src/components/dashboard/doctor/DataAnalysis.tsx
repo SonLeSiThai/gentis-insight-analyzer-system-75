@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import jsPDF from 'jspdf';
 import { 
   Upload, 
   FileText, 
@@ -222,38 +223,65 @@ export const DataAnalysis = () => {
       link.click();
       URL.revokeObjectURL(url);
     } else {
-      // PDF export (simplified as text)
-      const pdfContent = analysisResults.map((result, index) => `
-        BÁO CÁO PHÂN TÍCH XÉT NGHIỆM #${index + 1}
-        ==========================================
+      // PDF export
+      const pdf = new jsPDF();
+      const pageHeight = pdf.internal.pageSize.height;
+      let yPosition = 20;
+      
+      // Title
+      pdf.setFontSize(16);
+      pdf.text('BAO CAO PHAN TICH XET NGHIEM', 20, yPosition);
+      yPosition += 15;
+      
+      pdf.setFontSize(12);
+      pdf.text(`Ngay tao: ${new Date().toLocaleDateString('vi-VN')}`, 20, yPosition);
+      yPosition += 10;
+      pdf.text(`Tong so mau: ${analysisResults.length}`, 20, yPosition);
+      yPosition += 20;
+      
+      analysisResults.forEach((result, index) => {
+        // Check if we need a new page
+        if (yPosition > pageHeight - 40) {
+          pdf.addPage();
+          yPosition = 20;
+        }
         
-        Mã bệnh nhân: ${result.patientCode || result.sampleId}
-        Tên bệnh nhân: ${result.name || 'N/A'}
-        Tuổi: ${result.age || 'N/A'}
-        Giới tính: ${result.gender || 'N/A'}
+        pdf.setFontSize(14);
+        pdf.text(`BAO CAO MAU #${index + 1}`, 20, yPosition);
+        yPosition += 10;
         
-        ĐIỂM NGUY CƠ: ${result.riskScore}/100
+        pdf.setFontSize(10);
+        pdf.text(`Ma benh nhan: ${result.patientCode || result.sampleId}`, 20, yPosition);
+        yPosition += 6;
+        pdf.text(`Ten benh nhan: ${result.name || 'N/A'}`, 20, yPosition);
+        yPosition += 6;
+        pdf.text(`Tuoi: ${result.age || 'N/A'} | Gioi tinh: ${result.gender || 'N/A'}`, 20, yPosition);
+        yPosition += 6;
+        pdf.text(`Diem nguy co: ${result.riskScore}/100`, 20, yPosition);
+        yPosition += 10;
         
-        CHỈ SỐ SINH HỌC:
-        ${Object.entries(result.biomarkers).map(([key, marker]: [string, any]) => 
-          `- ${key.toUpperCase()}: ${marker.value} (BT: ${marker.normalRange}) - ${marker.status.toUpperCase()} [Tier ${marker.tier}]`
-        ).join('\n        ')}
+        pdf.text('CHI SO SINH HOC:', 20, yPosition);
+        yPosition += 6;
         
-        KẾT LUẬN:
-        ${result.riskScore > 50 ? 'NGUY CƠ CAO - Cần can thiệp y tế ngay' : 
-          result.riskScore > 20 ? 'NGUY CƠ TRUNG BÌNH - Theo dõi và tái khám' : 
-          'BÌNH THƯỜNG - Duy trì lối sống lành mạnh'}
+        Object.entries(result.biomarkers).forEach(([key, marker]: [string, any]) => {
+          if (yPosition > pageHeight - 20) {
+            pdf.addPage();
+            yPosition = 20;
+          }
+          const text = `- ${key.toUpperCase()}: ${marker.value} (BT: ${marker.normalRange}) - ${marker.status.toUpperCase()}`;
+          pdf.text(text, 25, yPosition);
+          yPosition += 5;
+        });
         
-        ==========================================
-      `).join('\n\n');
-
-      const blob = new Blob([pdfContent], { type: 'text/plain;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `BaoCaoPhanTich_${new Date().toISOString().split('T')[0]}.txt`;
-      link.click();
-      URL.revokeObjectURL(url);
+        yPosition += 5;
+        const conclusion = result.riskScore > 50 ? 'NGUY CO CAO - Can can thiep y te ngay' : 
+                         result.riskScore > 20 ? 'NGUY CO TRUNG BINH - Theo doi va tai kham' : 
+                         'BINH THUONG - Duy tri loi song lanh manh';
+        pdf.text(`Ket luan: ${conclusion}`, 20, yPosition);
+        yPosition += 15;
+      });
+      
+      pdf.save(`BaoCaoPhanTich_${new Date().toISOString().split('T')[0]}.pdf`);
     }
 
     toast({

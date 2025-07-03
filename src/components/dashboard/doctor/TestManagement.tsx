@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import jsPDF from 'jspdf';
 import { Plus, Search, Upload, FileText, AlertTriangle, Download } from 'lucide-react';
 
 interface TestManagementProps {
@@ -266,15 +267,90 @@ Ngày tạo: ${new Date().toLocaleString('vi-VN')}
 Bác sĩ phụ trách: ${isCollaborator ? 'Bác sĩ cộng tác' : 'Bác sĩ chính'}
       `;
 
-      const blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `BaoCao_ChiTiet_${test.code}.txt`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      const pdf = new jsPDF();
+      const pageHeight = pdf.internal.pageSize.height;
+      let yPosition = 20;
+      
+      // Title
+      pdf.setFontSize(16);
+      pdf.text('BAO CAO XET NGHIEM CHI TIET', 20, yPosition);
+      yPosition += 20;
+      
+      // Basic Info
+      pdf.setFontSize(12);
+      pdf.text('THONG TIN CHUNG:', 20, yPosition);
+      yPosition += 10;
+      
+      pdf.setFontSize(10);
+      pdf.text(`Ma xet nghiem: ${test.code}`, 20, yPosition);
+      yPosition += 6;
+      pdf.text(`Ten xet nghiem: ${test.name}`, 20, yPosition);
+      yPosition += 6;
+      pdf.text(`Ngay thuc hien: ${test.date}`, 20, yPosition);
+      yPosition += 6;
+      pdf.text(`So mau xet nghiem: ${test.samples}`, 20, yPosition);
+      yPosition += 6;
+      pdf.text(`Thoi gian xu ly: ${test.processingTime}`, 20, yPosition);
+      yPosition += 6;
+      pdf.text(`Trang thai: ${test.status === 'completed' ? 'Hoan thanh' : 'Dang xu ly'}`, 20, yPosition);
+      yPosition += 15;
+      
+      // Results Overview
+      pdf.setFontSize(12);
+      pdf.text('KET QUA TONG QUAN:', 20, yPosition);
+      yPosition += 10;
+      
+      pdf.setFontSize(10);
+      pdf.text(`So mau co nguy co cao: ${test.riskSamples}`, 20, yPosition);
+      yPosition += 6;
+      pdf.text(`Ty le nguy co cao: ${((test.riskSamples / test.samples) * 100).toFixed(1)}%`, 20, yPosition);
+      yPosition += 6;
+      pdf.text(`So mau binh thuong: ${test.samples - test.riskSamples}`, 20, yPosition);
+      yPosition += 15;
+      
+      // Suggested Diseases
+      pdf.setFontSize(12);
+      pdf.text('CAC BENH DUOC GOI Y:', 20, yPosition);
+      yPosition += 10;
+      
+      pdf.setFontSize(10);
+      if (test.suggestedDiseases.length > 0) {
+        test.suggestedDiseases.forEach((disease, index) => {
+          if (yPosition > pageHeight - 20) {
+            pdf.addPage();
+            yPosition = 20;
+          }
+          pdf.text(`${index + 1}. ${disease}`, 20, yPosition);
+          yPosition += 6;
+        });
+      } else {
+        pdf.text('Khong co benh duoc phat hien', 20, yPosition);
+        yPosition += 6;
+      }
+      yPosition += 10;
+      
+      // Recommendations
+      pdf.setFontSize(12);
+      pdf.text('KHUYEN NGHI:', 20, yPosition);
+      yPosition += 10;
+      
+      pdf.setFontSize(10);
+      pdf.text('- Theo doi chat che cac benh nhan co nguy co cao', 20, yPosition);
+      yPosition += 6;
+      pdf.text('- Tu van thay doi loi song cho benh nhan', 20, yPosition);
+      yPosition += 6;
+      pdf.text('- Xem xet cac xet nghiem bo sung neu can thiet', 20, yPosition);
+      yPosition += 15;
+      
+      // Footer
+      pdf.setFontSize(8);
+      pdf.text('Bao cao duoc tao boi SLSS Gentis', 20, yPosition);
+      yPosition += 5;
+      pdf.text(`Ngay tao: ${new Date().toLocaleString('vi-VN')}`, 20, yPosition);
+      yPosition += 5;
+      pdf.text(`Bac si phu trach: ${isCollaborator ? 'Bac si cong tac' : 'Bac si chinh'}`, 20, yPosition);
+      
+      pdf.save(`BaoCao_ChiTiet_${test.code}.pdf`);
       
       console.log('Xuất báo cáo chi tiết cho xét nghiệm:', test.name);
     }

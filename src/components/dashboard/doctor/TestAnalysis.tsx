@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
+import jsPDF from 'jspdf';
 import { 
   Search, 
   Filter, 
@@ -158,38 +159,74 @@ export const TestAnalysis = ({ userRole }: TestAnalysisProps) => {
   };
 
   const handleExportTestData = (test: any) => {
-    const csvContent = `
-Mã xét nghiệm,${test.code}
-Mã bệnh nhân,${test.patientCode}
-Tên bệnh nhân,${test.patientName}
-Ngày xét nghiệm,${test.date}
-Thời gian chẩn đoán,${test.diagnosisTime || 'Chưa hoàn thành'}
-Chẩn đoán,${test.diagnosis}
-Điểm nguy cơ,${test.riskScore}
-
-Chỉ số sinh học:
-Tên chỉ số,Giá trị,Khoảng bình thường,Trạng thái,Tier
-${Object.entries(test.biomarkers).map(([key, marker]: [string, any]) => 
-  `${key},${marker.value},${marker.normal},${marker.status},${marker.tier}`
-).join('\n')}
-
-Kết luận bác sĩ:
-${test.doctorConclusion || 'Chưa có kết luận'}
-    `.trim();
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `KetQuaXetNghiem_${test.code}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    const pdf = new jsPDF();
+    const pageHeight = pdf.internal.pageSize.height;
+    let yPosition = 20;
+    
+    // Title
+    pdf.setFontSize(16);
+    pdf.text('BAO CAO KET QUA XET NGHIEM', 20, yPosition);
+    yPosition += 20;
+    
+    // Basic Info
+    pdf.setFontSize(12);
+    pdf.text('THONG TIN CO BAN:', 20, yPosition);
+    yPosition += 10;
+    
+    pdf.setFontSize(10);
+    pdf.text(`Ma xet nghiem: ${test.code}`, 20, yPosition);
+    yPosition += 6;
+    pdf.text(`Ma benh nhan: ${test.patientCode}`, 20, yPosition);
+    yPosition += 6;
+    pdf.text(`Ten benh nhan: ${test.patientName}`, 20, yPosition);
+    yPosition += 6;
+    pdf.text(`Ngay xet nghiem: ${test.date}`, 20, yPosition);
+    yPosition += 6;
+    pdf.text(`Thoi gian chan doan: ${test.diagnosisTime || 'Chua hoan thanh'}`, 20, yPosition);
+    yPosition += 6;
+    pdf.text(`Chan doan: ${test.diagnosis}`, 20, yPosition);
+    yPosition += 6;
+    pdf.text(`Diem nguy co: ${test.riskScore}`, 20, yPosition);
+    yPosition += 15;
+    
+    // Biomarkers
+    pdf.setFontSize(12);
+    pdf.text('CHI SO SINH HOC:', 20, yPosition);
+    yPosition += 10;
+    
+    pdf.setFontSize(10);
+    Object.entries(test.biomarkers).forEach(([key, marker]: [string, any]) => {
+      if (yPosition > pageHeight - 20) {
+        pdf.addPage();
+        yPosition = 20;
+      }
+      pdf.text(`- ${key.toUpperCase()}: ${marker.value} (BT: ${marker.normal}) - ${marker.status.toUpperCase()} [Tier ${marker.tier}]`, 20, yPosition);
+      yPosition += 6;
+    });
+    
+    yPosition += 10;
+    
+    // Doctor Conclusion
+    pdf.setFontSize(12);
+    pdf.text('KET LUAN BAC SI:', 20, yPosition);
+    yPosition += 10;
+    
+    pdf.setFontSize(10);
+    const conclusion = test.doctorConclusion || 'Chua co ket luan';
+    pdf.text(conclusion, 20, yPosition);
+    yPosition += 15;
+    
+    // Footer
+    pdf.setFontSize(8);
+    pdf.text('Bao cao duoc tao boi SLSS Gentis', 20, yPosition);
+    yPosition += 5;
+    pdf.text(`Ngay tao: ${new Date().toLocaleString('vi-VN')}`, 20, yPosition);
+    
+    pdf.save(`KetQuaXetNghiem_${test.code}.pdf`);
     
     toast({
       title: "Xuất dữ liệu thành công",
-      description: `Dữ liệu xét nghiệm ${test.code} đã được xuất`,
+      description: `Dữ liệu xét nghiệm ${test.code} đã được xuất PDF`,
     });
   };
 

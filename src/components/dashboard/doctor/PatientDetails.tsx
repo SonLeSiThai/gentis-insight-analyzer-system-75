@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import jsPDF from 'jspdf';
 import { Download, FileText, Calendar, User, Phone, MapPin, Stethoscope } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -79,19 +80,124 @@ export const PatientDetails = ({ patient, userRole }: PatientDetailsProps) => {
       Ghi chú: Báo cáo này chỉ có giá trị tham khảo, cần kết hợp với khám lâm sàng
     `;
 
-    const blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `BaoCao_${patient.code}_${new Date().toISOString().split('T')[0]}.txt`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    const pdf = new jsPDF();
+    const pageHeight = pdf.internal.pageSize.height;
+    let yPosition = 20;
+    
+    // Title
+    pdf.setFontSize(16);
+    pdf.text('BAO CAO BENH NHAN CHI TIET', 20, yPosition);
+    yPosition += 20;
+    
+    // Basic Info
+    pdf.setFontSize(12);
+    pdf.text('THONG TIN BENH NHAN:', 20, yPosition);
+    yPosition += 10;
+    
+    pdf.setFontSize(10);
+    pdf.text(`Ma benh nhan: ${patient.code}`, 20, yPosition);
+    yPosition += 6;
+    pdf.text(`Ho ten: ${patient.name}`, 20, yPosition);
+    yPosition += 6;
+    pdf.text(`Tuoi: ${patient.age}`, 20, yPosition);
+    yPosition += 6;
+    pdf.text(`Gioi tinh: ${patient.gender}`, 20, yPosition);
+    yPosition += 6;
+    pdf.text(`So dien thoai: ${patient.phone}`, 20, yPosition);
+    yPosition += 6;
+    pdf.text(`Dia chi: ${patient.address}`, 20, yPosition);
+    yPosition += 6;
+    pdf.text(`Bac si phu trach: ${patient.assignedDoctor}`, 20, yPosition);
+    yPosition += 6;
+    pdf.text(`Ngay phan cong: ${patient.assignedDate}`, 20, yPosition);
+    yPosition += 6;
+    pdf.text(`Lan kham gan nhat: ${patient.lastVisit}`, 20, yPosition);
+    yPosition += 6;
+    pdf.text(`Trang thai: ${patient.status === 'active' ? 'Dang dieu tri' : 'Ngung dieu tri'}`, 20, yPosition);
+    yPosition += 15;
+    
+    // Test History
+    pdf.setFontSize(12);
+    pdf.text('LICH SU XET NGHIEM VA KET QUA:', 20, yPosition);
+    yPosition += 10;
+    
+    patient.tests.forEach((test: any, index: number) => {
+      if (yPosition > pageHeight - 60) {
+        pdf.addPage();
+        yPosition = 20;
+      }
+      
+      pdf.setFontSize(10);
+      pdf.text(`========= XET NGHIEM ${index + 1} =========`, 20, yPosition);
+      yPosition += 8;
+      pdf.text(`Ma xet nghiem: ${test.code}`, 20, yPosition);
+      yPosition += 6;
+      pdf.text(`Ngay thuc hien: ${test.date}`, 20, yPosition);
+      yPosition += 6;
+      pdf.text(`Thoi gian xet nghiem: ${test.testDateTime}`, 20, yPosition);
+      yPosition += 6;
+      pdf.text(`Thoi gian chan doan: ${test.diagnosisTime}`, 20, yPosition);
+      yPosition += 6;
+      pdf.text(`Chan doan: ${test.diagnosis}`, 20, yPosition);
+      yPosition += 6;
+      pdf.text(`Diem nguy co: ${test.riskScore}/100`, 20, yPosition);
+      yPosition += 8;
+      
+      pdf.text('CHI SO SINH HOC:', 20, yPosition);
+      yPosition += 6;
+      
+      Object.entries(test.biomarkers).forEach(([key, value]) => {
+        if (yPosition > pageHeight - 20) {
+          pdf.addPage();
+          yPosition = 20;
+        }
+        pdf.text(`   ${key.toUpperCase()}: ${value}`, 20, yPosition);
+        yPosition += 5;
+      });
+      
+      yPosition += 5;
+      pdf.text(`KET LUAN BAC SI: ${test.doctorConclusion || 'Chua co ket luan tu bac si'}`, 20, yPosition);
+      yPosition += 10;
+      
+      pdf.text('KHUYEN NGHI:', 20, yPosition);
+      yPosition += 6;
+      pdf.text(`- Theo doi dinh ky cac chi so: ${Object.keys(test.biomarkers).join(', ')}`, 20, yPosition);
+      yPosition += 5;
+      pdf.text('- Tuan thu che do dieu tri da duoc chi dinh', 20, yPosition);
+      yPosition += 5;
+      pdf.text('- Tai kham theo lich hen', 20, yPosition);
+      yPosition += 15;
+    });
+    
+    // Summary
+    pdf.setFontSize(12);
+    pdf.text('TONG KET VA KHUYEN NGHI:', 20, yPosition);
+    yPosition += 10;
+    
+    pdf.setFontSize(10);
+    pdf.text(`Tinh trang suc khoe hien tai: ${patient.tests.length > 0 ? patient.tests[0].diagnosis : 'Chua co du lieu'}`, 20, yPosition);
+    yPosition += 6;
+    pdf.text(`Xu huong: ${patient.tests.length > 1 ? 'Co du lieu theo doi' : 'Can them du lieu'}`, 20, yPosition);
+    yPosition += 6;
+    const riskLevel = patient.tests.length > 0 ? (patient.tests[0].riskScore > 70 ? 'Cao' : patient.tests[0].riskScore > 40 ? 'Trung binh' : 'Thap') : 'Chua danh gia';
+    pdf.text(`Nguy co: ${riskLevel}`, 20, yPosition);
+    yPosition += 15;
+    
+    // Footer
+    pdf.setFontSize(8);
+    pdf.text('Bao cao duoc tao boi: SLSS Gentis', 20, yPosition);
+    yPosition += 5;
+    pdf.text(`Ngay tao: ${new Date().toLocaleString('vi-VN')}`, 20, yPosition);
+    yPosition += 5;
+    pdf.text(`Nguoi tao: ${userRole === 'collaborator' ? 'Bac si cong tac' : 'Bac si Gentis'}`, 20, yPosition);
+    yPosition += 5;
+    pdf.text('Ghi chu: Bao cao nay chi co gia tri tham khao, can ket hop voi kham lam sang', 20, yPosition);
+    
+    pdf.save(`BaoCao_${patient.code}_${new Date().toISOString().split('T')[0]}.pdf`);
     
     toast({
       title: "Tải xuống thành công",
-      description: `Báo cáo chi tiết bệnh nhân ${patient.name} đã được tải xuống`,
+      description: `Báo cáo chi tiết bệnh nhân ${patient.name} đã được tải xuống PDF`,
     });
   };
 

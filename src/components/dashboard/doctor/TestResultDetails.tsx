@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
+import jsPDF from 'jspdf';
 import { Download, FileText, Calendar, User, Phone, MapPin, Activity, Info, Stethoscope } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { BIOMARKER_LIST, generateDefaultBiomarkers } from '@/data/biomarkers';
@@ -212,19 +213,146 @@ export const TestResultDetails = ({ testResult, userRole }: TestResultDetailsPro
       Bác sĩ: ${userRole === 'collaborator' ? 'Gentis' : 'Bác sĩ'}
     `;
 
-    const blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `BaoCao_ChiTiet_${testResult.testCode}.txt`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    const pdf = new jsPDF();
+    const pageHeight = pdf.internal.pageSize.height;
+    let yPosition = 20;
+    
+    // Title
+    pdf.setFontSize(16);
+    pdf.text('BAO CAO XET NGHIEM CHI TIET', 20, yPosition);
+    yPosition += 20;
+    
+    // Section A - Test Info
+    pdf.setFontSize(12);
+    pdf.text('A. THONG TIN XET NGHIEM:', 20, yPosition);
+    yPosition += 10;
+    
+    pdf.setFontSize(10);
+    pdf.text(`Ma so mau: ${testResult.testCode}`, 20, yPosition);
+    yPosition += 6;
+    pdf.text(`Ho ten: ${testResult.patientName}`, 20, yPosition);
+    yPosition += 6;
+    pdf.text(`Ngay sinh: ${testResult.birthDate}`, 20, yPosition);
+    yPosition += 6;
+    pdf.text(`Gioi tinh: ${additionalPatientData.gender}`, 20, yPosition);
+    yPosition += 6;
+    pdf.text(`So tuoi thai luc sinh: ${additionalPatientData.gestationalAge} tuan`, 20, yPosition);
+    yPosition += 6;
+    pdf.text(`Can nang luc sinh: ${additionalPatientData.birthWeight}g`, 20, yPosition);
+    yPosition += 6;
+    pdf.text(`Sinh doi/sinh don: ${additionalPatientData.twinStatus}`, 20, yPosition);
+    yPosition += 6;
+    pdf.text(`Thai IVF: ${additionalPatientData.ivfStatus}`, 20, yPosition);
+    yPosition += 6;
+    pdf.text(`So dien thoai: ${testResult.phone}`, 20, yPosition);
+    yPosition += 6;
+    pdf.text(`Ket qua: ${testResult.result === 'positive' ? 'Duong tinh' : 'Am tinh'}`, 20, yPosition);
+    yPosition += 15;
+    
+    // Section B - Biomarkers (first 10 only)
+    pdf.setFontSize(12);
+    pdf.text('B. CHI TIET CHI SO SINH HOC (10 CHI SO DIEN HINH):', 20, yPosition);
+    yPosition += 10;
+    
+    pdf.setFontSize(10);
+    BIOMARKER_LIST.slice(0, 10).forEach(biomarker => {
+      if (yPosition > pageHeight - 30) {
+        pdf.addPage();
+        yPosition = 20;
+      }
+      const key = biomarker.code.toLowerCase();
+      const marker = fullBiomarkers[key];
+      pdf.text(`- ${biomarker.name}: ${marker.value} (BT: ${marker.normal})`, 20, yPosition);
+      yPosition += 5;
+    });
+    
+    yPosition += 10;
+    
+    // Section C - Analysis
+    pdf.setFontSize(12);
+    pdf.text('C. KET QUA PHAN TICH:', 20, yPosition);
+    yPosition += 10;
+    
+    pdf.setFontSize(10);
+    pdf.text('DANH SACH CAC CHI SO TANG:', 20, yPosition);
+    yPosition += 6;
+    
+    if (highBiomarkers.length > 0) {
+      highBiomarkers.slice(0, 5).forEach(biomarker => {
+        if (yPosition > pageHeight - 20) {
+          pdf.addPage();
+          yPosition = 20;
+        }
+        const key = biomarker.code.toLowerCase();
+        const marker = fullBiomarkers[key];
+        pdf.text(`- ${biomarker.name}: ${marker.value} (BT: ${marker.normal})`, 20, yPosition);
+        yPosition += 5;
+      });
+    } else {
+      pdf.text('Khong co chi so nao tang cao', 20, yPosition);
+      yPosition += 5;
+    }
+    
+    yPosition += 5;
+    pdf.text('DANH SACH CAC CHI SO GIAM:', 20, yPosition);
+    yPosition += 6;
+    
+    if (lowBiomarkers.length > 0) {
+      lowBiomarkers.slice(0, 5).forEach(biomarker => {
+        if (yPosition > pageHeight - 20) {
+          pdf.addPage();
+          yPosition = 20;
+        }
+        const key = biomarker.code.toLowerCase();
+        const marker = fullBiomarkers[key];
+        pdf.text(`- ${biomarker.name}: ${marker.value} (BT: ${marker.normal})`, 20, yPosition);
+        yPosition += 5;
+      });
+    } else {
+      pdf.text('Khong co chi so nao giam thap', 20, yPosition);
+      yPosition += 5;
+    }
+    
+    yPosition += 10;
+    
+    // Section D - Diagnosis
+    pdf.setFontSize(12);
+    pdf.text('D. KET QUA CHAN DOAN:', 20, yPosition);
+    yPosition += 10;
+    
+    pdf.setFontSize(10);
+    pdf.text(`Ket qua xet nghiem: ${testResult.result === 'positive' ? 'Duong tinh' : 'Am tinh'}`, 20, yPosition);
+    yPosition += 6;
+    pdf.text(`Chan doan: ${testResult.diagnosis}`, 20, yPosition);
+    yPosition += 6;
+    if (testResult.diseaseCode) {
+      pdf.text(`Ma benh: ${testResult.diseaseCode}`, 20, yPosition);
+      yPosition += 6;
+    }
+    yPosition += 10;
+    
+    // Section E - Doctor Conclusion
+    pdf.setFontSize(12);
+    pdf.text('E. KET LUAN CUA BAC SI:', 20, yPosition);
+    yPosition += 10;
+    
+    pdf.setFontSize(10);
+    pdf.text(testResult.doctorConclusion || 'Chua co ket luan tu bac si', 20, yPosition);
+    yPosition += 15;
+    
+    // Footer
+    pdf.setFontSize(8);
+    pdf.text('Bao cao duoc tao boi: SLSS Gentis', 20, yPosition);
+    yPosition += 5;
+    pdf.text(`Ngay tao: ${new Date().toLocaleString('vi-VN')}`, 20, yPosition);
+    yPosition += 5;
+    pdf.text(`Bac si: ${userRole === 'collaborator' ? 'Gentis' : 'Bac si'}`, 20, yPosition);
+    
+    pdf.save(`BaoCao_ChiTiet_${testResult.testCode}.pdf`);
     
     toast({
       title: "Tải xuống thành công",
-      description: `Báo cáo chi tiết ${testResult.testCode} đã được tải xuống`,
+      description: `Báo cáo chi tiết ${testResult.testCode} đã được tải xuống PDF`,
     });
   };
 
