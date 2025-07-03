@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import jsPDF from 'jspdf';
+import { PdfGenerator, sanitizeVietnameseText, formatBiomarkers } from '@/lib/pdfGenerator';
 import { 
   Upload, 
   FileText, 
@@ -198,7 +198,7 @@ export const DataAnalysis = () => {
     }
   };
 
-  const exportResults = (format: 'csv' | 'pdf') => {
+  const exportResults = async (format: 'csv' | 'pdf') => {
     if (analysisResults.length === 0) return;
 
     if (format === 'csv') {
@@ -223,70 +223,69 @@ export const DataAnalysis = () => {
       link.click();
       URL.revokeObjectURL(url);
     } else {
-      // PDF export
-      const pdf = new jsPDF();
-      const pageHeight = pdf.internal.pageSize.height;
-      let yPosition = 20;
-      
-      // Title
-      pdf.setFontSize(16);
-      pdf.text('BAO CAO PHAN TICH XET NGHIEM', 20, yPosition);
-      yPosition += 15;
-      
-      pdf.setFontSize(12);
-      pdf.text(`Ngay tao: ${new Date().toLocaleDateString('vi-VN')}`, 20, yPosition);
-      yPosition += 10;
-      pdf.text(`Tong so mau: ${analysisResults.length}`, 20, yPosition);
-      yPosition += 20;
-      
-      analysisResults.forEach((result, index) => {
-        // Check if we need a new page
-        if (yPosition > pageHeight - 40) {
-          pdf.addPage();
-          yPosition = 20;
-        }
+      try {
+        // PDF export
+        const pdfGen = new PdfGenerator();
         
-        pdf.setFontSize(14);
-        pdf.text(`BAO CAO MAU #${index + 1}`, 20, yPosition);
-        yPosition += 10;
+        // Title
+        pdfGen.addTitle('BÁO CÁO PHÂN TÍCH XÉT NGHIỆM');
         
-        pdf.setFontSize(10);
-        pdf.text(`Ma benh nhan: ${result.patientCode || result.sampleId}`, 20, yPosition);
-        yPosition += 6;
-        pdf.text(`Ten benh nhan: ${result.name || 'N/A'}`, 20, yPosition);
-        yPosition += 6;
-        pdf.text(`Tuoi: ${result.age || 'N/A'} | Gioi tinh: ${result.gender || 'N/A'}`, 20, yPosition);
-        yPosition += 6;
-        pdf.text(`Diem nguy co: ${result.riskScore}/100`, 20, yPosition);
-        yPosition += 10;
+        // Summary
+        pdfGen.addLabelValue('Ngày tạo', new Date().toLocaleDateString('vi-VN'));
+        pdfGen.addLabelValue('Tổng số mẫu', analysisResults.length.toString());
+        pdfGen.addSpace();
         
-        pdf.text('CHI SO SINH HOC:', 20, yPosition);
-        yPosition += 6;
-        
-        Object.entries(result.biomarkers).forEach(([key, marker]: [string, any]) => {
-          if (yPosition > pageHeight - 20) {
-            pdf.addPage();
-            yPosition = 20;
-          }
-          const text = `- ${key.toUpperCase()}: ${marker.value} (BT: ${marker.normalRange}) - ${marker.status.toUpperCase()}`;
-          pdf.text(text, 25, yPosition);
-          yPosition += 5;
+        analysisResults.forEach((result, index) => {
+          // Sample header
+          pdfGen.addSectionHeader(`BÁO CÁO MẪU #${index + 1}`);
+          
+          // Basic info
+          pdfGen.addLabelValue('Mã bệnh nhân', result.patientCode || result.sampleId);
+          pdfGen.addLabelValue('Tên bệnh nhân', result.name || 'N/A');
+          pdfGen.addLabelValue('Tuổi', result.age?.toString() || 'N/A');
+          pdfGen.addLabelValue('Giới tính', result.gender || 'N/A');
+          pdfGen.addLabelValue('Điểm nguy cơ', `${result.riskScore}/100`);
+          
+          pdfGen.addSpace();
+          
+          // Convert biomarkers to array format for new API
+          const biomarkersArray = Object.entries(result.biomarkers).map(([key, marker]: [string, any]) => ({
+            name: key.toUpperCase(),
+            value: marker.value,
+            unit: '',
+            normalRange: marker.normalRange,
+            status: marker.status === 'high' ? 'Cao' : 
+                    marker.status === 'low' ? 'Thấp' : 'Bình thường'
+          }));
+          
+          // Format biomarkers using new table format
+          pdfGen.formatBiomarkers(biomarkersArray);
+          
+          // Conclusion
+          const conclusion = result.riskScore > 50 ? 'NGUY CƠ CAO - Cần can thiệp y tế ngay' : 
+                           result.riskScore > 20 ? 'NGUY CƠ TRUNG BÌNH - Theo dõi và tái khám' : 
+                           'BÌNH THƯỜNG - Duy trì lối sống lành mạnh';
+          pdfGen.addText(`Kết luận: ${conclusion}`);
+          
+          pdfGen.addSpace();
         });
         
-        yPosition += 5;
-        const conclusion = result.riskScore > 50 ? 'NGUY CO CAO - Can can thiep y te ngay' : 
-                         result.riskScore > 20 ? 'NGUY CO TRUNG BINH - Theo doi va tai kham' : 
-                         'BINH THUONG - Duy tri loi song lanh manh';
-        pdf.text(`Ket luan: ${conclusion}`, 20, yPosition);
-        yPosition += 15;
-      });
-      
-      pdf.save(`BaoCaoPhanTich_${new Date().toISOString().split('T')[0]}.pdf`);
+        // Generate and download PDF
+        await pdfGen.downloadPdf(`BaoCaoPhanTich_${new Date().toISOString().split('T')[0]}.pdf`);
+      } catch (error) {
+        console.error('Error generating PDF:', error);
+        toast({
+          title: "Lỗi tạo PDF",
+          description: "Không thể tạo file PDF. Vui lòng thử lại.",
+          variant: "destructive"
+        });
+        return;
+      }
     }
 
     toast({
       title: "Xuất kết quả thành công",
-      description: `Đã xuất ${analysisResults.length} kết quả phân tích`,
+      description: `Đã xuất ${analysisResults.length} kết quả phân tích với font tiếng Việt`,
     });
   };
 
