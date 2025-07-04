@@ -244,7 +244,7 @@ export const ReportsView = ({ userRole }: ReportsViewProps) => {
       - Nguy cơ thấp: ${reports.filter(r => r.riskLevel === 'low').length}
       - Tỷ lệ phát hiện bệnh: ${((reports.filter(r => r.riskLevel !== 'low').length / reports.length) * 100).toFixed(1)}%
       
-      Báo cáo được tạo bởi SLSS Gentis
+                    Báo cáo được tạo bởi Gentis
       Ngày tạo: ${new Date().toLocaleString('vi-VN')}
       Người tạo: Bác sĩ ${userRole === 'collaborator' ? 'Cộng tác' : 'Chính'}
     `;

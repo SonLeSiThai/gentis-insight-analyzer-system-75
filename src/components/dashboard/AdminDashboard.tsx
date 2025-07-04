@@ -59,7 +59,7 @@ export const AdminDashboard = ({ user, onLogout }: AdminDashboardProps) => {
               <Activity className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-slate-800">SLSS Gentis - Admin</h1>
+              <h1 className="text-xl font-bold text-slate-800">Gentis - Admin</h1>
               <p className="text-sm text-slate-600">Quản trị hệ thống</p>
             </div>
           </div>

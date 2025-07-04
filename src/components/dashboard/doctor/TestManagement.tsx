@@ -262,7 +262,7 @@ KHUYẾN NGHỊ:
 ${isCollaborator ? '- Liên hệ bác sĩ chính để tư vấn thêm nếu cần thiết' : ''}
 
 ============================
-Báo cáo được tạo bởi SLSS Gentis
+              Báo cáo được tạo bởi Gentis
 Ngày tạo: ${new Date().toLocaleString('vi-VN')}
 Bác sĩ phụ trách: ${isCollaborator ? 'Bác sĩ cộng tác' : 'Bác sĩ chính'}
       `;
@@ -344,7 +344,7 @@ Bác sĩ phụ trách: ${isCollaborator ? 'Bác sĩ cộng tác' : 'Bác sĩ ch�
       
       // Footer
       pdf.setFontSize(8);
-      pdf.text('Bao cao duoc tao boi SLSS Gentis', 20, yPosition);
+              pdf.text('Bao cao duoc tao boi Gentis', 20, yPosition);
       yPosition += 5;
       pdf.text(`Ngay tao: ${new Date().toLocaleString('vi-VN')}`, 20, yPosition);
       yPosition += 5;

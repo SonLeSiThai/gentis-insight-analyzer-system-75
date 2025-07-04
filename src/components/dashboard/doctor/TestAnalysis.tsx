@@ -218,7 +218,7 @@ export const TestAnalysis = ({ userRole }: TestAnalysisProps) => {
     
     // Footer
     pdf.setFontSize(8);
-    pdf.text('Bao cao duoc tao boi SLSS Gentis', 20, yPosition);
+            pdf.text('Bao cao duoc tao boi Gentis', 20, yPosition);
     yPosition += 5;
     pdf.text(`Ngay tao: ${new Date().toLocaleString('vi-VN')}`, 20, yPosition);
     

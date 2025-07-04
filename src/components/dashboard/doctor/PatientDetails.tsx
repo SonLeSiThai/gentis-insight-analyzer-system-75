@@ -74,7 +74,7 @@ export const PatientDetails = ({ patient, userRole }: PatientDetailsProps) => {
       - Nguy cơ: ${patient.tests.length > 0 ? (patient.tests[0].riskScore > 70 ? 'Cao' : patient.tests[0].riskScore > 40 ? 'Trung bình' : 'Thấp') : 'Chưa đánh giá'}
       
       ==========================
-      Báo cáo được tạo bởi: SLSS Gentis
+                    Báo cáo được tạo bởi: Gentis
       Ngày tạo: ${new Date().toLocaleString('vi-VN')}
       Người tạo: ${userRole === 'collaborator' ? 'Bác sĩ cộng tác' : 'Bác sĩ Gentis'}
       Ghi chú: Báo cáo này chỉ có giá trị tham khảo, cần kết hợp với khám lâm sàng
@@ -185,7 +185,7 @@ export const PatientDetails = ({ patient, userRole }: PatientDetailsProps) => {
     
     // Footer
     pdf.setFontSize(8);
-    pdf.text('Bao cao duoc tao boi: SLSS Gentis', 20, yPosition);
+            pdf.text('Bao cao duoc tao boi: Gentis', 20, yPosition);
     yPosition += 5;
     pdf.text(`Ngay tao: ${new Date().toLocaleString('vi-VN')}`, 20, yPosition);
     yPosition += 5;

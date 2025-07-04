@@ -37,7 +37,7 @@ const Index = () => {
                   <Activity className="h-8 w-8 text-white" />
                 </div>
               </div>
-              <h1 className="text-3xl font-bold text-slate-800 mb-2">SLSS Gentis</h1>
+              <h1 className="text-3xl font-bold text-slate-800 mb-2">Gentis</h1>
               <p className="text-slate-600">Phần mềm hỗ trợ phân tích xét nghiệm sàng lọc</p>
             </div>
             <LoginForm onLogin={handleLogin} />

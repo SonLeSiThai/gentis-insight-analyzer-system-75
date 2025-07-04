@@ -78,7 +78,7 @@ const DoctorSidebar = ({ activeTab, setActiveTab, userRole }: {
         <SidebarGroup>
           <SidebarGroupLabel className="text-lg font-semibold mb-4">
             <Activity className="h-5 w-5 mr-2" />
-            SLSS Gentis
+                            Gentis
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
