@@ -168,7 +168,7 @@ export const LoginForm = ({ onLogin }: LoginFormProps) => {
               onClick={() => handleLogin('collaborator')}
               disabled={loading}
             >
-              Đăng nhập Gentis
+              Đăng nhập Bác sĩ Gentis
             </Button>
           </TabsContent>
         </Tabs>
