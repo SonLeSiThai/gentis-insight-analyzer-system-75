@@ -138,7 +138,7 @@ export const LoginForm = ({ onLogin }: LoginFormProps) => {
             </TabsTrigger>
             <TabsTrigger value="collaborator" className="text-sm">
               <User className="h-4 w-4 mr-1" />
-              Cộng tác
+              Gentis
             </TabsTrigger>
           </TabsList>
           
@@ -168,7 +168,7 @@ export const LoginForm = ({ onLogin }: LoginFormProps) => {
               onClick={() => handleLogin('collaborator')}
               disabled={loading}
             >
-              Đăng nhập Bác sĩ Gentis
+              Đăng nhập Gentis
             </Button>
           </TabsContent>
         </Tabs>
