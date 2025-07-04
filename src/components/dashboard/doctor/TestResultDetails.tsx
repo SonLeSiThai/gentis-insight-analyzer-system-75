@@ -209,34 +209,34 @@ export const TestResultDetails = ({ testResult, userRole }: TestResultDetailsPro
       
       pdfGen.addSpace();
       
-      // Section C - Analysis Results
-      pdfGen.addSectionHeader('C. KẾT QUẢ PHÂN TÍCH:');
+    //   // Section C - Analysis Results
+    //   pdfGen.addSectionHeader('C. KẾT QUẢ PHÂN TÍCH:');
       
-      pdfGen.addText('DANH SÁCH CÁC CHỈ SỐ TĂNG:');
-    if (highBiomarkers.length > 0) {
-      highBiomarkers.slice(0, 5).forEach(biomarker => {
-        const key = biomarker.code.toLowerCase();
-        const marker = fullBiomarkers[key];
-          pdfGen.addText(`- ${biomarker.name}: ${marker.value} (BT: ${marker.normal})`);
-      });
-    } else {
-        pdfGen.addText('Không có chỉ số nào tăng cao');
-    }
+    //   pdfGen.addText('DANH SÁCH CÁC CHỈ SỐ TĂNG:');
+    // if (highBiomarkers.length > 0) {
+    //   highBiomarkers.slice(0, 5).forEach(biomarker => {
+    //     const key = biomarker.code.toLowerCase();
+    //     const marker = fullBiomarkers[key];
+    //       pdfGen.addText(`- ${biomarker.name}: ${marker.value} (BT: ${marker.normal})`);
+    //   });
+    // } else {
+    //     pdfGen.addText('Không có chỉ số nào tăng cao');
+    // }
     
-      pdfGen.addSpace();
+    //   pdfGen.addSpace();
     
-      pdfGen.addText('DANH SÁCH CÁC CHỈ SỐ GIẢM:');
-    if (lowBiomarkers.length > 0) {
-      lowBiomarkers.slice(0, 5).forEach(biomarker => {
-        const key = biomarker.code.toLowerCase();
-        const marker = fullBiomarkers[key];
-          pdfGen.addText(`- ${biomarker.name}: ${marker.value} (BT: ${marker.normal})`);
-      });
-    } else {
-        pdfGen.addText('Không có chỉ số nào giảm thấp');
-    }
+    //   pdfGen.addText('DANH SÁCH CÁC CHỈ SỐ GIẢM:');
+    // if (lowBiomarkers.length > 0) {
+    //   lowBiomarkers.slice(0, 5).forEach(biomarker => {
+    //     const key = biomarker.code.toLowerCase();
+    //     const marker = fullBiomarkers[key];
+    //       pdfGen.addText(`- ${biomarker.name}: ${marker.value} (BT: ${marker.normal})`);
+    //   });
+    // } else {
+    //     pdfGen.addText('Không có chỉ số nào giảm thấp');
+    // }
     
-      pdfGen.addSpace();
+    //   pdfGen.addSpace();
     
     // Section D - Diagnosis
       pdfGen.addSectionHeader('D. KẾT QUẢ CHẨN ĐOÁN:');
