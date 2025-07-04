@@ -721,113 +721,123 @@ export const TestResultManagement = ({ userRole }: TestResultManagementProps) =>
   };
   // --- KẾT THÚC: HÀM LẤY DỮ LIỆU BỆNH NHI BỔ SUNG ---
 
-  // --- BẮT ĐẦU: THAY THẾ HÀM handleDownloadDetails BẰNG handleDownloadReport ---
-  const handleDownloadReport = async (testResult: any) => {
-    // Lấy dữ liệu đầy đủ cho báo cáo
-    const additionalPatientData = getAdditionalPatientData(testResult.testCode);
-    const fullBiomarkers = generateDefaultBiomarkers();
-    Object.keys(testResult.biomarkers).forEach(key => {
-        if (fullBiomarkers[key]) {
-            fullBiomarkers[key] = testResult.biomarkers[key];
-        }
-    });
+  // Dán đoạn code này vào file TestResultManagement.tsx để thay thế hàm handleDownloadReport cũ
 
-    const highBiomarkers = BIOMARKER_LIST.filter(biomarker => {
-      const key = biomarker.code.toLowerCase();
-      return fullBiomarkers[key]?.status === 'high';
-    });
-    const lowBiomarkers = BIOMARKER_LIST.filter(biomarker => {
-      const key = biomarker.code.toLowerCase();
-      return fullBiomarkers[key]?.status === 'low';
-    });
+const handleDownloadReport = async (testResult: any) => {
+  // --- Bắt đầu quá trình chuẩn bị dữ liệu cho PdfGenerator ---
 
-    try {
-      const pdfGen = new PdfGenerator();
-      
-      pdfGen.addTitle('BÁO CÁO XÉT NGHIỆM CHI TIẾT');
-      
-      pdfGen.addSectionHeader('A. THÔNG TIN XÉT NGHIỆM:');
-      pdfGen.addLabelValue('Mã số mẫu', testResult.testCode);
-      pdfGen.addLabelValue('Họ tên', testResult.patientName);
-      pdfGen.addLabelValue('Ngày sinh', testResult.birthDate);
-      pdfGen.addLabelValue('Giới tính', additionalPatientData.gender);
-      pdfGen.addLabelValue('Số tuổi thai lúc sinh', `${additionalPatientData.gestationalAge} tuần`);
-      pdfGen.addLabelValue('Cân nặng lúc sinh', `${additionalPatientData.birthWeight}g`);
-      pdfGen.addLabelValue('Sinh đôi/sinh đơn', additionalPatientData.twinStatus);
-      pdfGen.addLabelValue('Thai IVF', additionalPatientData.ivfStatus);
-      pdfGen.addLabelValue('Địa chỉ', additionalPatientData.address);
-      pdfGen.addLabelValue('Tình trạng dùng kháng sinh', additionalPatientData.antibioticUse);
-      pdfGen.addLabelValue('Dùng sữa mẹ', additionalPatientData.breastfeeding);
-      pdfGen.addLabelValue('Ngày lấy mẫu', additionalPatientData.sampleCollectionDate);
-      pdfGen.addLabelValue('Ngày nhận mẫu', additionalPatientData.sampleReceiptDate);
-      pdfGen.addLabelValue('Ngày xét nghiệm', testResult.testDate);
-      pdfGen.addLabelValue('Ngày phân tích', testResult.analysisDate);
-      pdfGen.addLabelValue('Số điện thoại', testResult.phone);
-      pdfGen.addLabelValue('Số điện thoại bác sĩ', additionalPatientData.doctorPhone || doctorPhone);
-      pdfGen.addLabelValue('Kết quả', testResult.result === 'positive' ? 'Dương tính' : 'Âm tính');
-      pdfGen.addSpace();
-      
-      pdfGen.addSectionHeader('B. CHI TIẾT 77 CHỈ SỐ SINH HỌC:');
-      const biomarkersArray = BIOMARKER_LIST.map(biomarker => {
+  // 1. Lấy dữ liệu bệnh nhi bổ sung
+  const additionalPatientData = getAdditionalPatientData(testResult.testCode);
+
+  // 2. Tạo danh sách đầy đủ 77 chỉ số
+  const fullBiomarkers = generateDefaultBiomarkers();
+  Object.keys(testResult.biomarkers).forEach(key => {
+    if (fullBiomarkers[key]) {
+      fullBiomarkers[key] = testResult.biomarkers[key];
+    }
+  });
+
+  // 3. Chuẩn bị mảng biomarkers để truyền vào hàm formatBiomarkers
+  const biomarkersForPdf = BIOMARKER_LIST.map(biomarker => {
+    const key = biomarker.code.toLowerCase();
+    const marker = fullBiomarkers[key];
+    return {
+      name: biomarker.name,
+      value: marker.value || '--',
+      unit: '', // Bạn có thể thêm đơn vị ở đây nếu cần
+      normalRange: marker.normal || 'N/A',
+      status: marker.status === 'high' ? 'Tăng' : marker.status === 'low' ? 'Giảm' : 'Trong ngưỡng',
+    };
+  });
+
+  // 4. Lọc ra các chỉ số Tăng/Giảm để hiển thị riêng
+  const highBiomarkers = BIOMARKER_LIST.filter(b => fullBiomarkers[b.code.toLowerCase()]?.status === 'high');
+  const lowBiomarkers = BIOMARKER_LIST.filter(b => fullBiomarkers[b.code.toLowerCase()]?.status === 'low');
+  
+  // --- Kết thúc quá trình chuẩn bị dữ liệu ---
+
+  try {
+    // Khởi tạo lớp PdfGenerator
+    const pdfGen = new PdfGenerator();
+    
+    // Bắt đầu xây dựng nội dung HTML cho file PDF
+    pdfGen.addTitle('BÁO CÁO XÉT NGHIỆM CHI TIẾT');
+    
+    // Mục A: Thông tin xét nghiệm
+    pdfGen.addSectionHeader('A. THÔNG TIN XÉT NGHIỆM');
+    pdfGen.addLabelValue('Mã số mẫu', testResult.testCode);
+    pdfGen.addLabelValue('Họ tên', testResult.patientName);
+    pdfGen.addLabelValue('Ngày sinh', testResult.birthDate);
+    pdfGen.addLabelValue('Giới tính', additionalPatientData.gender);
+    pdfGen.addLabelValue('Số tuổi thai lúc sinh', `${additionalPatientData.gestationalAge} tuần`);
+    pdfGen.addLabelValue('Cân nặng lúc sinh', `${additionalPatientData.birthWeight}g`);
+    pdfGen.addLabelValue('Sinh đôi/sinh đơn', additionalPatientData.twinStatus);
+    pdfGen.addLabelValue('Thai IVF', additionalPatientData.ivfStatus);
+    pdfGen.addLabelValue('Địa chỉ', additionalPatientData.address);
+    pdfGen.addLabelValue('Tình trạng dùng kháng sinh', additionalPatientData.antibioticUse);
+    pdfGen.addLabelValue('Dùng sữa mẹ', additionalPatientData.breastfeeding);
+    pdfGen.addLabelValue('Ngày lấy mẫu', additionalPatientData.sampleCollectionDate);
+    pdfGen.addLabelValue('Ngày nhận mẫu', additionalPatientData.sampleReceiptDate);
+    pdfGen.addLabelValue('Ngày xét nghiệm', testResult.testDate);
+    pdfGen.addLabelValue('Ngày phân tích', testResult.analysisDate);
+    pdfGen.addLabelValue('Số điện thoại', testResult.phone);
+    pdfGen.addLabelValue('Số điện thoại bác sĩ', additionalPatientData.doctorPhone || doctorPhone);
+    pdfGen.addLabelValue('Kết quả', testResult.result === 'positive' ? 'Dương tính' : 'Âm tính');
+    pdfGen.addSpace();
+    
+    // Mục B: Bảng chi tiết 77 chỉ số
+    // Truyền dữ liệu đã được định dạng vào hàm formatBiomarkers
+    pdfGen.formatBiomarkers(biomarkersForPdf);
+    
+    // Mục C: Kết quả phân tích tóm tắt
+    pdfGen.addSectionHeader('C. KẾT QUẢ PHÂN TÍCH');
+    pdfGen.addText('DANH SÁCH CÁC CHỈ SỐ TĂNG:');
+    if (highBiomarkers.length > 0) {
+      highBiomarkers.forEach(biomarker => {
         const key = biomarker.code.toLowerCase();
         const marker = fullBiomarkers[key];
-        return {
-          name: biomarker.name,
-          value: marker.value,
-          unit: '', // Đơn vị có thể thêm vào nếu cần
-          normalRange: marker.normal,
-          status: marker.status === 'high' ? 'Tăng' : marker.status === 'low' ? 'Giảm' : 'Trong ngưỡng'
-        };
+        pdfGen.addText(`- ${biomarker.name}: ${marker.value} (BT: ${marker.normal})`);
       });
-      pdfGen.formatBiomarkers(biomarkersArray);
-      pdfGen.addSpace();
-      
-      pdfGen.addSectionHeader('C. KẾT QUẢ PHÂN TÍCH:');
-      pdfGen.addText('DANH SÁCH CÁC CHỈ SỐ TĂNG:');
-      if (highBiomarkers.length > 0) {
-        highBiomarkers.slice(0, 5).forEach(biomarker => {
-          const key = biomarker.code.toLowerCase();
-          const marker = fullBiomarkers[key];
-          pdfGen.addText(`- ${biomarker.name}: ${marker.value} (BT: ${marker.normal})`);
-        });
-      } else {
-        pdfGen.addText('Không có chỉ số nào tăng cao');
-      }
-      pdfGen.addSpace();
-    
-      pdfGen.addText('DANH SÁCH CÁC CHỈ SỐ GIẢM:');
-      if (lowBiomarkers.length > 0) {
-        lowBiomarkers.slice(0, 5).forEach(biomarker => {
-          const key = biomarker.code.toLowerCase();
-          const marker = fullBiomarkers[key];
-          pdfGen.addText(`- ${biomarker.name}: ${marker.value} (BT: ${marker.normal})`);
-        });
-      } else {
-        pdfGen.addText('Không có chỉ số nào giảm thấp');
-      }
-      pdfGen.addSpace();
-    
-      pdfGen.addSectionHeader('D. KẾT QUẢ CHẨN ĐOÁN:');
-      pdfGen.addLabelValue('Kết quả xét nghiệm', testResult.result === 'positive' ? 'Dương tính' : 'Âm tính');
-      pdfGen.addLabelValue('Chẩn đoán', testResult.diagnosis);
-      if (testResult.diseaseCode) {
-        pdfGen.addLabelValue('Mã bệnh', testResult.diseaseCode);
-      }
-      pdfGen.addSpace();
-    
-      pdfGen.addSectionHeader('E. KẾT LUẬN CỦA BÁC SĨ:');
-      pdfGen.addText(testResult.doctorConclusion || 'Chưa có kết luận từ bác sĩ');
-      
-      await pdfGen.downloadPdf(`BaoCao_ChiTiet_${testResult.testCode}.pdf`);
-    
-      toast({ title: "Tải xuống thành công", description: `Báo cáo chi tiết ${testResult.testCode} đã được tải xuống PDF` });
-      
-    } catch (error) {
-      console.error('Error generating PDF:', error);
-      toast({ title: "Lỗi tạo PDF", description: "Không thể tạo file PDF. Vui lòng thử lại.", variant: "destructive" });
+    } else {
+      pdfGen.addText('Không có chỉ số nào tăng cao');
     }
-  };
-  // --- KẾT THÚC: THAY THẾ HÀM handleDownloadDetails ---
+    pdfGen.addSpace();
+  
+    pdfGen.addText('DANH SÁCH CÁC CHỈ SỐ GIẢM:');
+    if (lowBiomarkers.length > 0) {
+      lowBiomarkers.forEach(biomarker => {
+        const key = biomarker.code.toLowerCase();
+        const marker = fullBiomarkers[key];
+        pdfGen.addText(`- ${biomarker.name}: ${marker.value} (BT: ${marker.normal})`);
+      });
+    } else {
+      pdfGen.addText('Không có chỉ số nào giảm thấp');
+    }
+    pdfGen.addSpace();
+  
+    // Mục D: Kết quả chẩn đoán
+    pdfGen.addSectionHeader('D. KẾT QUẢ CHẨN ĐOÁN');
+    pdfGen.addLabelValue('Kết quả xét nghiệm', testResult.result === 'positive' ? 'Dương tính' : 'Âm tính');
+    pdfGen.addLabelValue('Chẩn đoán', testResult.diagnosis);
+    if (testResult.diseaseCode) {
+      pdfGen.addLabelValue('Mã bệnh', testResult.diseaseCode);
+    }
+    pdfGen.addSpace();
+  
+    // Mục E: Kết luận bác sĩ
+    pdfGen.addSectionHeader('E. KẾT LUẬN CỦA BÁC SĨ');
+    pdfGen.addText(testResult.doctorConclusion || 'Chưa có kết luận từ bác sĩ');
+    
+    // Gọi hàm downloadPdf để bắt đầu quá trình tạo ảnh và tải về
+    await pdfGen.downloadPdf(`BaoCao_ChiTiet_${testResult.testCode}.pdf`);
+  
+    toast({ title: "Tải xuống thành công", description: `Báo cáo chi tiết ${testResult.testCode} đã được tải xuống PDF` });
+    
+  } catch (error) {
+    console.error('Lỗi khi tạo PDF:', error);
+    toast({ title: "Lỗi tạo PDF", description: "Không thể tạo file PDF. Vui lòng thử lại.", variant: "destructive" });
+  }
+};
 
   const handleViewTestDetails = (testResult: any) => {
     setSelectedTest(testResult);
