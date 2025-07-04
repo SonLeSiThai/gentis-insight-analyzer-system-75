@@ -239,7 +239,7 @@ export const TestResultDetails = ({ testResult, userRole }: TestResultDetailsPro
     //   pdfGen.addSpace();
     
     // Section D - Diagnosis
-      pdfGen.addSectionHeader('D. KẾT QUẢ CHẨN ĐOÁN:');
+      pdfGen.addSectionHeader('C. KẾT QUẢ CHẨN ĐOÁN:');
       pdfGen.addLabelValue('Kết quả xét nghiệm', testResult.result === 'positive' ? 'Dương tính' : 'Âm tính');
       pdfGen.addLabelValue('Chẩn đoán', testResult.diagnosis);
     if (testResult.diseaseCode) {
@@ -249,7 +249,7 @@ export const TestResultDetails = ({ testResult, userRole }: TestResultDetailsPro
       pdfGen.addSpace();
     
     // Section E - Doctor Conclusion
-      pdfGen.addSectionHeader('E. KẾT LUẬN CỦA BÁC SĨ:');
+      pdfGen.addSectionHeader('D. KẾT LUẬN CỦA BÁC SĨ:');
       pdfGen.addText(testResult.doctorConclusion || 'Chưa có kết luận từ bác sĩ');
       
       // Generate and download PDF
