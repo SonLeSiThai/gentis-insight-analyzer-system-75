@@ -47,7 +47,7 @@ export const TestResultManagement = ({ userRole }: TestResultManagementProps) =>
       analysisDate: '03/07/2025',
       accountCode: isCollaborator ? 'COL001' : 'GEN001',
       diagnosis: 'Citrullinemia type I (argininosuccinate synthetase)',
-      diseaseCode: 'D001',
+      diseaseCode: 'D003',
       biomarkers: {
         ala: { value: 291, normal: '117 - 541', status: 'normal' },
         arg: { value: 2.1, normal: '0.9 - 32', status: 'normal' },
@@ -329,7 +329,7 @@ export const TestResultManagement = ({ userRole }: TestResultManagementProps) =>
       analysisDate: '03/10/2025',
       accountCode: isCollaborator ? 'COL001' : 'GEN001',
       diagnosis: 'Glutaric acidemia type I (glutaryl-CoA dehydrogenase)',
-      diseaseCode: 'D003',
+      diseaseCode: 'D005',
       biomarkers: {
         ala: { value: 218, normal: '117 - 541', status: 'normal' },
         arg: { value: 6, normal: '0.9 - 32', status: 'normal' },
