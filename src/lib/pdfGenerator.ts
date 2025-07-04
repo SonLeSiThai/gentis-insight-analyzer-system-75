@@ -1,4 +1,3 @@
-
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
@@ -36,7 +35,7 @@ export class PdfGenerator {
   // Add title
   addTitle(title: string): void {
     this.content.push(`
-      <div style="text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 20px; color: #1a1a1a;">
+      <div style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px; color: #000000; font-family: 'Courier New', monospace;">
         ${title}
       </div>
     `);
@@ -45,7 +44,7 @@ export class PdfGenerator {
   // Add section header
   addSectionHeader(header: string): void {
     this.content.push(`
-      <div style="font-size: 14px; font-weight: bold; margin: 15px 0 8px 0; color: #2d3748; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px;">
+      <div style="font-size: 16px; font-weight: bold; margin: 25px 0 12px 0; color: #000000; border-bottom: 2px solid #333333; padding-bottom: 6px; padding-top: 15px; font-family: 'Courier New', monospace;">
         ${header}
       </div>
     `);
@@ -54,7 +53,7 @@ export class PdfGenerator {
   // Add normal text
   addText(text: string): void {
     this.content.push(`
-      <div style="font-size: 11px; margin: 4px 0; color: #4a5568; line-height: 1.4;">
+      <div style="font-size: 12px; margin: 4px 0; color: #000000; line-height: 1.6; font-family: 'Courier New', monospace;">
         ${text}
       </div>
     `);
@@ -63,15 +62,15 @@ export class PdfGenerator {
   // Add text with label
   addLabelValue(label: string, value: string): void {
     this.content.push(`
-      <div style="font-size: 11px; margin: 3px 0; color: #2d3748;">
-        <span style="font-weight: 500;">${label}:</span> <span style="color: #4a5568;">${value}</span>
+      <div style="font-size: 12px; margin: 3px 0; color: #000000; font-family: 'Courier New', monospace;">
+        <span style="font-weight: bold;">${label}:</span> <span style="color: #333333;">${value}</span>
       </div>
     `);
   }
 
   // Add space
   addSpace(): void {
-    this.content.push(`<div style="margin: 10px 0;"></div>`);
+    this.content.push('<div style="height: 15px; margin: 15px 0;"></div>');
   }
 
   // Format patient information for PDF
@@ -89,17 +88,17 @@ export class PdfGenerator {
 
   // Format biomarkers with nice table
   formatBiomarkers(biomarkers: BiomarkerResult[]): void {
-    this.addSectionHeader('CHỈ SỐ SINH HÓC:');
+    this.addSectionHeader('CHỈ SỐ SINH HỌC:');
     
     let tableHtml = `
-      <table style="width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+      <table style="width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); font-family: 'Courier New', monospace;">
         <thead>
           <tr style="background: linear-gradient(to bottom, #f8f9fa 0%, #e9ecef 100%);">
-            <th style="border: 1px solid #dee2e6; padding: 12px 8px; text-align: left; font-weight: 700; color: #495057; font-size: 13px;">Chỉ số</th>
-            <th style="border: 1px solid #dee2e6; padding: 12px 8px; text-align: center; font-weight: 700; color: #495057; font-size: 13px;">Giá trị</th>
-            <th style="border: 1px solid #dee2e6; padding: 12px 8px; text-align: center; font-weight: 700; color: #495057; font-size: 13px;">Đơn vị</th>
-            <th style="border: 1px solid #dee2e6; padding: 12px 8px; text-align: center; font-weight: 700; color: #495057; font-size: 13px;">Khoảng tham chiếu</th>
-            <th style="border: 1px solid #dee2e6; padding: 12px 8px; text-align: center; font-weight: 700; color: #495057; font-size: 13px;">Trạng thái</th>
+            <th style="border: 1px solid #333333; padding: 12px 8px; text-align: left; font-weight: bold; color: #000000; font-size: 13px;">Chỉ số</th>
+            <th style="border: 1px solid #333333; padding: 12px 8px; text-align: center; font-weight: bold; color: #000000; font-size: 13px;">Giá trị</th>
+            <th style="border: 1px solid #333333; padding: 12px 8px; text-align: center; font-weight: bold; color: #000000; font-size: 13px;">Đơn vị</th>
+            <th style="border: 1px solid #333333; padding: 12px 8px; text-align: center; font-weight: bold; color: #000000; font-size: 13px;">Khoảng tham chiếu</th>
+            <th style="border: 1px solid #333333; padding: 12px 8px; text-align: center; font-weight: bold; color: #000000; font-size: 13px;">Trạng thái</th>
           </tr>
         </thead>
         <tbody>
@@ -115,21 +114,21 @@ export class PdfGenerator {
       
       tableHtml += `
         <tr style="background-color: ${backgroundColor};">
-          <td style="border: 1px solid #dee2e6; padding: 10px 8px; color: #495057; font-weight: 500;">${biomarker.name}</td>
-          <td style="border: 1px solid #dee2e6; padding: 10px 8px; text-align: center; color: #495057; font-weight: 600; font-size: 13px;">${biomarker.value}</td>
-          <td style="border: 1px solid #dee2e6; padding: 10px 8px; text-align: center; color: #6c757d; font-style: italic;">${biomarker.unit}</td>
-          <td style="border: 1px solid #dee2e6; padding: 10px 8px; text-align: center; color: #6c757d;">${biomarker.normalRange}</td>
-          <td style="border: 1px solid #dee2e6; padding: 10px 8px; text-align: center; color: ${statusColor}; font-weight: 600; text-transform: uppercase; font-size: 11px;">${biomarker.status}</td>
+          <td style="border: 1px solid #333333; padding: 10px 8px; color: #000000; font-weight: 500;">${biomarker.name}</td>
+          <td style="border: 1px solid #333333; padding: 10px 8px; text-align: center; color: #000000; font-weight: 600; font-size: 13px;">${biomarker.value}</td>
+          <td style="border: 1px solid #333333; padding: 10px 8px; text-align: center; color: #333333; font-style: italic;">${biomarker.unit}</td>
+          <td style="border: 1px solid #333333; padding: 10px 8px; text-align: center; color: #333333;">${biomarker.normalRange}</td>
+          <td style="border: 1px solid #333333; padding: 10px 8px; text-align: center; color: ${statusColor}; font-weight: 600; text-transform: uppercase; font-size: 11px;">${biomarker.status}</td>
         </tr>
       `;
     });
 
-    tableHtml += `
-        </tbody>
-      </table>
-    `;
-
+    tableHtml += '</tbody></table>';
+    
     this.content.push(tableHtml);
+    
+    // Add extra spacing after table for better page breaks
+    this.content.push('<div style="height: 20px; margin: 20px 0;"></div>');
   }
 
   // Generate and download PDF using html2canvas - simplified approach
@@ -146,7 +145,7 @@ export class PdfGenerator {
       width: 800px;
       padding: 40px;
       background-color: white;
-      font-family: Arial, sans-serif;
+      font-family: 'Courier New', monospace;
       font-size: 14px;
       line-height: 1.6;
       color: #333;
@@ -271,7 +270,7 @@ export class PdfGenerator {
       width: 800px;
       padding: 40px;
       background-color: white;
-      font-family: Arial, sans-serif;
+      font-family: 'Courier New', monospace;
       font-size: 14px;
       line-height: 1.6;
       color: #333;
@@ -369,7 +368,7 @@ export class PdfGenerator {
 
   private generateHtmlContent(): string {
     return `
-      <div style="font-family: Arial, sans-serif; color: #1a1a1a; line-height: 1.5; padding-bottom: 60px;">
+      <div style="font-family: 'Courier New', monospace; color: #000000; line-height: 1.6; padding-bottom: 60px; background-color: #ffffff;">
         ${this.content.join('')}
       </div>
     `;
@@ -389,7 +388,7 @@ export class PdfGenerator {
       
       // Footer styling
       pdf.setFontSize(8);
-      pdf.setFont('helvetica', 'normal');
+      pdf.setFont('courier', 'normal');
       
       // Add separator line above footer
       pdf.setDrawColor(220, 220, 220);
@@ -397,7 +396,7 @@ export class PdfGenerator {
       pdf.line(20, pageHeight - 20, pageWidth - 20, pageHeight - 20);
       
       // Footer content
-      pdf.setTextColor(100, 100, 100);
+      pdf.setTextColor(0, 0, 0);
       pdf.text(`Ngay tao: ${new Date().toLocaleDateString('vi-VN')}`, 20, pageHeight - 14);
       
       // Page number (right aligned)
@@ -436,7 +435,7 @@ Ngày phân tích: ${patientInfo.analysisDate}
 
 // Format biomarkers utility
 export const formatBiomarkers = (biomarkers: BiomarkerResult[]): string => {
-  let result = '\nCHỈ SỐ SINH HÓC:\n';
+  let result = '\nCHỈ SỐ SINH HỌC:\n';
   biomarkers.forEach(biomarker => {
     result += `- ${biomarker.name}: ${biomarker.value} (${biomarker.unit}) - ${biomarker.status}\n`;
   });
