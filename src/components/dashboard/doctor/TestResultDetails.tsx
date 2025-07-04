@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -38,54 +37,120 @@ export const TestResultDetails = ({ testResult, userRole }: TestResultDetailsPro
   const { toast } = useToast();
   const isCollaborator = userRole === 'collaborator';
 
-  // Mock doctor phone for the test result
-  const doctorPhone = '0987 654 321';
+
+
 
   // Mock additional patient data based on test code
   const getAdditionalPatientData = () => {
-    if (testResult.testCode === 'y12345678') {
-      return {
+    const patientDataMap: Record<string, any> = {
+      'y12345678': {
         gender: 'Nữ',
-        gestationalAge: 39, // weeks
-        birthWeight: 3800, // grams
-        twinStatus: 'Sinh đơn', // đôi/đơn
-        ivfStatus: 'Có', // có/không
+        gestationalAge: 39,
+        birthWeight: 3800,
+        twinStatus: 'Sinh đơn',
+        ivfStatus: 'Có',
         address: 'Hà Nội',
-        antibioticUse: 'Không', // có/không
-        breastfeeding: 'Có', // có/không
-        sampleCode: testResult.testCode,
+        antibioticUse: 'Không',
+        breastfeeding: 'Có',
+
         sampleCollectionDate: '03/05/2025',
-        sampleReceiptDate: '03/05/2025'
-      };
-    } else if (testResult.testCode === 'y12345679') {
-      return {
+        sampleReceiptDate: '03/05/2025',
+        doctorPhone: '0908 631 472'
+      },
+      'y12345679': {
         gender: 'Nữ',
-        gestationalAge: 39, // weeks
-        birthWeight: 3700, // grams
-        twinStatus: 'Sinh đơn', // đôi/đơn
-        ivfStatus: 'Có', // có/không
+        gestationalAge: 39,
+        birthWeight: 3700,
+        twinStatus: 'Sinh đơn',
+        ivfStatus: 'Có',
         address: 'Hà Nội',
-        antibioticUse: 'Không', // có/không
-        breastfeeding: 'Có', // có/không
-        sampleCode: testResult.testCode,
+        antibioticUse: 'Không',
+        breastfeeding: 'Có',
+
         sampleCollectionDate: '03/06/2025',
         sampleReceiptDate: '03/06/2025',
         doctorPhone: '0908 631 472'
-      };
-    }
-    // Default data for other tests
-    return {
+      },
+      'y12345680': {
+        gender: 'Nam',
+        gestationalAge: 38,
+        birthWeight: 2800,
+        twinStatus: 'Sinh đơn',
+        ivfStatus: 'Không',
+        address: 'Hà Nội',
+        antibioticUse: 'Không',
+        breastfeeding: 'Có',
+        sampleCollectionDate: '03/07/2025',
+        sampleReceiptDate: '03/07/2025',
+        doctorPhone: '0968 435 712'
+      },
+      'y12345681': {
+        gender: 'Nam',
+        gestationalAge: 38,
+        birthWeight: 3000,
+        twinStatus: 'Sinh đơn',
+        ivfStatus: 'Không',
+        address: 'Hà Nội',
+        antibioticUse: 'Không',
+        breastfeeding: 'Có',
+        sampleCollectionDate: '03/08/2025',
+        sampleReceiptDate: '03/08/2025',
+        doctorPhone: '0907 486 319'
+      },
+      'y12345682': {
+        gender: 'Nam',
+        gestationalAge: 38,
+        birthWeight: 3000,
+        twinStatus: 'Sinh đơn',
+        ivfStatus: 'Không',
+        address: 'Hà Nội',
+        antibioticUse: 'Không',
+        breastfeeding: 'Có',
+        sampleCollectionDate: '03/09/2025',
+        sampleReceiptDate: '03/09/2025',
+        doctorPhone: '0935 286 917'
+      },
+      'y12345683': {
+        gender: 'Nữ',
+        gestationalAge: 38,
+        birthWeight: 3200,
+        twinStatus: 'Sinh đơn',
+        ivfStatus: 'Không',
+        address: 'Hà Nội',
+        antibioticUse: 'Không',
+        breastfeeding: 'Có',
+        sampleCollectionDate: '03/10/2025',
+        sampleReceiptDate: '03/10/2025',
+        doctorPhone: '0904 182 735'
+      },
+      'y12345684': {
+        gender: 'Nữ',
+        gestationalAge: 38,
+        birthWeight: 3400,
+        twinStatus: 'Sinh đơn',
+        ivfStatus: 'Không',
+        address: 'Hà Nội',
+        antibioticUse: 'Không',
+        breastfeeding: 'Có',
+        sampleCollectionDate: '03/11/2025',
+        sampleReceiptDate: '03/11/2025',
+        doctorPhone: '0979 561 832'
+      }
+    };
+
+    return patientDataMap[testResult.testCode] || {
       gender: 'Nữ',
-      gestationalAge: 39, // weeks
-      birthWeight: 3800, // grams
-      twinStatus: 'Sinh đơn', // đôi/đơn
-      ivfStatus: 'Có', // có/không
+      gestationalAge: 39,
+      birthWeight: 3800,
+      twinStatus: 'Sinh đơn',
+      ivfStatus: 'Có',
       address: 'Hà Nội',
-      antibioticUse: 'Không', // có/không
-      breastfeeding: 'Có', // có/không
-      sampleCode: testResult.testCode,
+      antibioticUse: 'Không',
+      breastfeeding: 'Có',
+
       sampleCollectionDate: '03/05/2025',
-      sampleReceiptDate: '03/05/2025'
+      sampleReceiptDate: '03/05/2025',
+      doctorPhone: '0908 631 472'
     };
   };
 
@@ -113,7 +178,7 @@ export const TestResultDetails = ({ testResult, userRole }: TestResultDetailsPro
 
   // Generate full biomarker data with your 77 biomarkers
   const fullBiomarkers = generateDefaultBiomarkers();
-  
+
   // Merge with existing data
   Object.keys(testResult.biomarkers).forEach(key => {
     if (fullBiomarkers[key]) {
@@ -166,13 +231,13 @@ export const TestResultDetails = ({ testResult, userRole }: TestResultDetailsPro
       - Địa chỉ: ${additionalPatientData.address}
       - Tình trạng dùng kháng sinh: ${additionalPatientData.antibioticUse}
       - Dùng sữa mẹ: ${additionalPatientData.breastfeeding}
-      - Mã số mẫu: ${additionalPatientData.sampleCode}
+      - Mã số mẫu: ${testResult.testCode}
       - Ngày lấy mẫu: ${additionalPatientData.sampleCollectionDate}
       - Ngày nhận mẫu: ${additionalPatientData.sampleReceiptDate}
       - Ngày xét nghiệm: ${testResult.testDate}
       - Ngày phân tích: ${testResult.analysisDate}
       - Số điện thoại: ${testResult.phone}
-      - Số điện thoại bác sĩ: ${additionalPatientData.doctorPhone || doctorPhone}
+      - Số điện thoại bác sĩ: ${additionalPatientData.doctorPhone}
       - Kết quả: ${testResult.result === 'positive' ? 'Dương tính' : 'Âm tính'}
       
       B. CHI TIẾT 77 CHỈ SỐ SINH HỌC:
@@ -216,17 +281,17 @@ export const TestResultDetails = ({ testResult, userRole }: TestResultDetailsPro
     const pdf = new jsPDF();
     const pageHeight = pdf.internal.pageSize.height;
     let yPosition = 20;
-    
+
     // Title
     pdf.setFontSize(16);
     pdf.text('BAO CAO XET NGHIEM CHI TIET', 20, yPosition);
     yPosition += 20;
-    
+
     // Section A - Test Info
     pdf.setFontSize(12);
     pdf.text('A. THONG TIN XET NGHIEM:', 20, yPosition);
     yPosition += 10;
-    
+
     pdf.setFontSize(10);
     pdf.text(`Ma so mau: ${testResult.testCode}`, 20, yPosition);
     yPosition += 6;
@@ -248,12 +313,12 @@ export const TestResultDetails = ({ testResult, userRole }: TestResultDetailsPro
     yPosition += 6;
     pdf.text(`Ket qua: ${testResult.result === 'positive' ? 'Duong tinh' : 'Am tinh'}`, 20, yPosition);
     yPosition += 15;
-    
+
     // Section B - Biomarkers (first 10 only)
     pdf.setFontSize(12);
     pdf.text('B. CHI TIET CHI SO SINH HOC (10 CHI SO DIEN HINH):', 20, yPosition);
     yPosition += 10;
-    
+
     pdf.setFontSize(10);
     BIOMARKER_LIST.slice(0, 10).forEach(biomarker => {
       if (yPosition > pageHeight - 30) {
@@ -265,18 +330,18 @@ export const TestResultDetails = ({ testResult, userRole }: TestResultDetailsPro
       pdf.text(`- ${biomarker.name}: ${marker.value} (BT: ${marker.normal})`, 20, yPosition);
       yPosition += 5;
     });
-    
+
     yPosition += 10;
-    
+
     // Section C - Analysis
     pdf.setFontSize(12);
     pdf.text('C. KET QUA PHAN TICH:', 20, yPosition);
     yPosition += 10;
-    
+
     pdf.setFontSize(10);
     pdf.text('DANH SACH CAC CHI SO TANG:', 20, yPosition);
     yPosition += 6;
-    
+
     if (highBiomarkers.length > 0) {
       highBiomarkers.slice(0, 5).forEach(biomarker => {
         if (yPosition > pageHeight - 20) {
@@ -292,11 +357,11 @@ export const TestResultDetails = ({ testResult, userRole }: TestResultDetailsPro
       pdf.text('Khong co chi so nao tang cao', 20, yPosition);
       yPosition += 5;
     }
-    
+
     yPosition += 5;
     pdf.text('DANH SACH CAC CHI SO GIAM:', 20, yPosition);
     yPosition += 6;
-    
+
     if (lowBiomarkers.length > 0) {
       lowBiomarkers.slice(0, 5).forEach(biomarker => {
         if (yPosition > pageHeight - 20) {
@@ -312,14 +377,14 @@ export const TestResultDetails = ({ testResult, userRole }: TestResultDetailsPro
       pdf.text('Khong co chi so nao giam thap', 20, yPosition);
       yPosition += 5;
     }
-    
+
     yPosition += 10;
-    
+
     // Section D - Diagnosis
     pdf.setFontSize(12);
     pdf.text('D. KET QUA CHAN DOAN:', 20, yPosition);
     yPosition += 10;
-    
+
     pdf.setFontSize(10);
     pdf.text(`Ket qua xet nghiem: ${testResult.result === 'positive' ? 'Duong tinh' : 'Am tinh'}`, 20, yPosition);
     yPosition += 6;
@@ -330,16 +395,16 @@ export const TestResultDetails = ({ testResult, userRole }: TestResultDetailsPro
       yPosition += 6;
     }
     yPosition += 10;
-    
+
     // Section E - Doctor Conclusion
     pdf.setFontSize(12);
     pdf.text('E. KET LUAN CUA BAC SI:', 20, yPosition);
     yPosition += 10;
-    
+
     pdf.setFontSize(10);
     pdf.text(testResult.doctorConclusion || 'Chua co ket luan tu bac si', 20, yPosition);
     yPosition += 15;
-    
+
     // Footer
     pdf.setFontSize(8);
     pdf.text('Bao cao duoc tao boi: SLSS Gentis', 20, yPosition);
@@ -347,9 +412,9 @@ export const TestResultDetails = ({ testResult, userRole }: TestResultDetailsPro
     pdf.text(`Ngay tao: ${new Date().toLocaleString('vi-VN')}`, 20, yPosition);
     yPosition += 5;
     pdf.text(`Bac si: ${userRole === 'collaborator' ? 'Gentis' : 'Bac si'}`, 20, yPosition);
-    
+
     pdf.save(`BaoCao_ChiTiet_${testResult.testCode}.pdf`);
-    
+
     toast({
       title: "Tải xuống thành công",
       description: `Báo cáo chi tiết ${testResult.testCode} đã được tải xuống PDF`,
@@ -420,7 +485,7 @@ export const TestResultDetails = ({ testResult, userRole }: TestResultDetailsPro
                   </div>
                   <div>
                     <span className="font-medium text-slate-700">Số điện thoại bác sĩ chỉ định:</span>
-                    <span className="ml-2">{additionalPatientData.doctorPhone || doctorPhone}</span>
+                    <span className="ml-2">{additionalPatientData.doctorPhone}</span>
                   </div>
                 </div>
               </div>
@@ -628,7 +693,7 @@ export const TestResultDetails = ({ testResult, userRole }: TestResultDetailsPro
                   rows={4}
                 />
               </div>
-              
+
               <div className="flex space-x-2">
                 <Button 
                   className="flex-1 bg-blue-600 hover:bg-blue-700"
@@ -666,7 +731,7 @@ export const TestResultDetails = ({ testResult, userRole }: TestResultDetailsPro
                     <h3 className="font-medium mb-2">Mô tả:</h3>
                     <p className="text-slate-700">{disease.description}</p>
                   </div>
-                  
+
                   <div>
                     <h3 className="font-medium mb-2">Triệu chứng:</h3>
                     <ul className="list-disc list-inside space-y-1">
@@ -675,12 +740,12 @@ export const TestResultDetails = ({ testResult, userRole }: TestResultDetailsPro
                       ))}
                     </ul>
                   </div>
-                  
+
                   <div>
                     <h3 className="font-medium mb-2">Chẩn đoán:</h3>
                     <p className="text-slate-700">{disease.diagnosis}</p>
                   </div>
-                  
+
                   <div>
                     <h3 className="font-medium mb-2">Điều trị:</h3>
                     <p className="text-slate-700">{disease.treatment}</p>
