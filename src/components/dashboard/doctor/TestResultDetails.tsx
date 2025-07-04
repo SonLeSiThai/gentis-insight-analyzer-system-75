@@ -373,7 +373,7 @@ export const TestResultDetails = ({ testResult, userRole }: TestResultDetailsPro
   const [showDiseaseDialog, setShowDiseaseDialog] = useState(false);
   const [diseaseViewType, setDiseaseViewType] = useState<'detail' | 'summary'>('detail');
   const { toast } = useToast();
-  const isCollaborator = userRole === 'collaborator';
+  const isCollaborator = userRole === 'collaborator'; 
   const doctorPhone = '0987 654 321';
 
   const getAdditionalPatientData = () => {
