@@ -135,7 +135,7 @@ export const PatientManagement = ({ userRole }: PatientManagementProps) => {
       - Ghi chú đặc biệt: Cần tuân thủ nghiêm ngặt chế độ điều trị
       
       ============================
-      Báo cáo được tạo bởi SLSS Gentis
+                    Báo cáo được tạo bởi Gentis
       Ngày tạo: ${new Date().toLocaleString('vi-VN')}
       Người tạo: Bác sĩ ${userRole === 'collaborator' ? 'Cộng tác' : 'Chính'}
       Tài khoản: ${patient.accountCode}
@@ -239,7 +239,7 @@ export const PatientManagement = ({ userRole }: PatientManagementProps) => {
     
     // Footer
     pdf.setFontSize(8);
-    pdf.text('Bao cao duoc tao boi SLSS Gentis', 20, yPosition);
+            pdf.text('Bao cao duoc tao boi Gentis', 20, yPosition);
     yPosition += 5;
     pdf.text(`Ngay tao: ${new Date().toLocaleString('vi-VN')}`, 20, yPosition);
     yPosition += 5;

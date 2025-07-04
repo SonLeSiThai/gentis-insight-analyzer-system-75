@@ -32,7 +32,7 @@ export const LoginForm = ({ onLogin }: LoginFormProps) => {
       setLoading(false);
       toast({
         title: "Đăng nhập thành công",
-        description: "Chào mừng bạn đến với SLSS Gentis",
+        description: "Chào mừng bạn đến với Gentis",
       });
     }, 1000);
   };
@@ -168,7 +168,7 @@ export const LoginForm = ({ onLogin }: LoginFormProps) => {
               onClick={() => handleLogin('collaborator')}
               disabled={loading}
             >
-              Đăng nhập Gentis
+              Đăng nhập Bác sĩ Gentis
             </Button>
           </TabsContent>
         </Tabs>
