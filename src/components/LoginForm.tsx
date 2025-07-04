@@ -134,11 +134,11 @@ export const LoginForm = ({ onLogin }: LoginFormProps) => {
             </TabsTrigger>
             <TabsTrigger value="doctor" className="text-sm">
               <Stethoscope className="h-4 w-4 mr-1" />
-              Bác sĩ
+              Gentis
             </TabsTrigger>
             <TabsTrigger value="collaborator" className="text-sm">
               <User className="h-4 w-4 mr-1" />
-              Gentis
+              Bác sĩ
             </TabsTrigger>
           </TabsList>
           
@@ -158,7 +158,7 @@ export const LoginForm = ({ onLogin }: LoginFormProps) => {
               onClick={() => handleLogin('doctor')}
               disabled={loading}
             >
-              Đăng nhập Bác sĩ 
+              Đăng nhập Gentis 
             </Button>
           </TabsContent>
           
@@ -168,7 +168,7 @@ export const LoginForm = ({ onLogin }: LoginFormProps) => {
               onClick={() => handleLogin('collaborator')}
               disabled={loading}
             >
-              Đăng nhập Gentis
+              Đăng nhập Bác Sĩ
             </Button>
           </TabsContent>
         </Tabs>
