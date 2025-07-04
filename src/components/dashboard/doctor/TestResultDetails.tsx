@@ -192,9 +192,9 @@ export const TestResultDetails = ({ testResult, userRole }: TestResultDetailsPro
       
       pdfGen.addSpace();
       
-      // Section B - Biomarkers (first 10)
-      pdfGen.addSectionHeader('B. CHI TIẾT CHỈ SỐ SINH HỌC (10 CHỈ SỐ ĐIỂN HÌNH):');
-      const biomarkersArray = BIOMARKER_LIST.slice(0, 10).map(biomarker => {
+      // Section B - Biomarkers (all 77)
+      pdfGen.addSectionHeader('B. CHI TIẾT 77 CHỈ SỐ SINH HỌC:');
+      const biomarkersArray = BIOMARKER_LIST.map(biomarker => {
         const key = biomarker.code.toLowerCase();
         const marker = fullBiomarkers[key];
         return {
