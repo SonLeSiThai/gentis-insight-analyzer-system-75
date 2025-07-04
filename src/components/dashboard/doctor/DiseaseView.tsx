@@ -4,6 +4,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { 
   Search, 
   Eye,
@@ -53,6 +62,8 @@ export const DiseaseView = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDisease, setSelectedDisease] = useState<Disease | null>(null);
   const [viewType, setViewType] = useState<'detail' | 'summary'>('detail');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   // Your specific disease data
   const [diseases] = useState([
@@ -1316,6 +1327,18 @@ export const DiseaseView = () => {
     disease.code.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Pagination logic
+  const totalPages = Math.ceil(filteredDiseases.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentDiseases = filteredDiseases.slice(startIndex, endIndex);
+
+  // Reset page when search changes
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+    setCurrentPage(1);
+  };
+
   const handleViewDisease = (disease: Disease, type: 'detail' | 'summary') => {
     setSelectedDisease(disease);
     setViewType(type);
@@ -1335,7 +1358,7 @@ export const DiseaseView = () => {
             <Input
               placeholder="Tìm kiếm theo tên bệnh hoặc mã bệnh..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => handleSearchChange(e.target.value)}
               className="pl-10"
             />
           </div>
@@ -1358,7 +1381,7 @@ export const DiseaseView = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredDiseases.map((disease) => (
+              {currentDiseases.map((disease) => (
                 <TableRow key={disease.id}>
                   <TableCell>
                     <Badge variant="outline" className="font-mono">
@@ -1395,6 +1418,75 @@ export const DiseaseView = () => {
               ))}
             </TableBody>
           </Table>
+          
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between px-6 py-4 border-t">
+              <div className="text-sm text-slate-600">
+                Hiển thị {startIndex + 1} đến {Math.min(endIndex, filteredDiseases.length)} của {filteredDiseases.length} bệnh
+              </div>
+              
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (currentPage > 1) setCurrentPage(currentPage - 1);
+                      }}
+                      className={currentPage <= 1 ? "pointer-events-none opacity-50" : ""}
+                    />
+                  </PaginationItem>
+                  
+                  {[...Array(totalPages)].map((_, index) => {
+                    const page = index + 1;
+                    if (
+                      page === 1 ||
+                      page === totalPages ||
+                      (page >= currentPage - 1 && page <= currentPage + 1)
+                    ) {
+                      return (
+                        <PaginationItem key={page}>
+                          <PaginationLink
+                            href="#"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setCurrentPage(page);
+                            }}
+                            isActive={currentPage === page}
+                          >
+                            {page}
+                          </PaginationLink>
+                        </PaginationItem>
+                      );
+                    } else if (
+                      page === currentPage - 2 ||
+                      page === currentPage + 2
+                    ) {
+                      return (
+                        <PaginationItem key={page}>
+                          <PaginationEllipsis />
+                        </PaginationItem>
+                      );
+                    }
+                    return null;
+                  })}
+                  
+                  <PaginationItem>
+                    <PaginationNext 
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+                      }}
+                      className={currentPage >= totalPages ? "pointer-events-none opacity-50" : ""}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -1419,10 +1511,10 @@ export const DiseaseView = () => {
                       ))}
                     </ul>
                   </div>
-
+                  
                   {/* Dấu hiệu và Triệu chứng */}
                   {selectedDisease.overview?.signsAndSymptoms && (
-                    <div>
+                  <div>
                       <h3 className="text-lg font-semibold mb-3 text-slate-800">Dấu hiệu và Triệu chứng</h3>
                       <div className="space-y-3">
                         {selectedDisease.id === 3 ? (
@@ -1514,36 +1606,36 @@ export const DiseaseView = () => {
                               </div>
                             )}
                             {selectedDisease.overview.signsAndSymptoms.general && (
-                              <ul className="list-disc list-inside space-y-1">
+                    <ul className="list-disc list-inside space-y-1">
                                 {selectedDisease.overview.signsAndSymptoms.general.map((note: string, index: number) => (
                                   <li key={index} className="text-slate-700">{note}</li>
-                                ))}
-                              </ul>
+                      ))}
+                    </ul>
                             )}
                           </>
                         )}
-                      </div>
+                  </div>
                     </div>
                   )}
-
+                  
                   {/* Nguyên nhân */}
                   {selectedDisease.overview?.causes && (
-                    <div>
+                  <div>
                       <h3 className="text-lg font-semibold mb-3 text-slate-800">Nguyên nhân</h3>
                       <div className="space-y-2">
                         {selectedDisease.overview.causes.map((cause: string, index: number) => (
                           <p key={index} className="text-slate-700">{cause}</p>
                         ))}
-                      </div>
+                  </div>
                     </div>
                   )}
-
+                  
                   {/* Đối tượng ảnh hưởng */}
                   {selectedDisease.overview?.affectedPopulations && (
-                    <div>
+                  <div>
                       <h3 className="text-lg font-semibold mb-3 text-slate-800">Đối tượng ảnh hưởng</h3>
                       <p className="text-slate-700">{selectedDisease.overview.affectedPopulations}</p>
-                    </div>
+                  </div>
                   )}
 
                   {/* Các bệnh có triệu chứng tương tự */}
@@ -1555,7 +1647,7 @@ export const DiseaseView = () => {
                           <li key={index} className="text-slate-700">{disease}</li>
                         ))}
                       </ul>
-                    </div>
+                </div>
                   )}
 
                   {/* Chẩn đoán */}
@@ -1834,7 +1926,7 @@ export const DiseaseView = () => {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-slate-700">{selectedDisease.summary}</p>
+                  <p className="text-slate-700">{selectedDisease.summary}</p>
                   )}
                 </div>
               )}
