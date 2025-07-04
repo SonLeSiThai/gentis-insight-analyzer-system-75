@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -38,54 +37,114 @@ export const TestResultDetails = ({ testResult, userRole }: TestResultDetailsPro
   const { toast } = useToast();
   const isCollaborator = userRole === 'collaborator';
 
-  // Mock doctor phone for the test result
-  const doctorPhone = '0987 654 321';
-
   // Mock additional patient data based on test code
   const getAdditionalPatientData = () => {
-    if (testResult.testCode === 'y12345678') {
-      return {
+    const patientDataMap: Record<string, any> = {
+      'y12345678': {
         gender: 'Nữ',
-        gestationalAge: 39, // weeks
-        birthWeight: 3800, // grams
-        twinStatus: 'Sinh đơn', // đôi/đơn
-        ivfStatus: 'Có', // có/không
+        gestationalAge: 39,
+        birthWeight: 3800,
+        twinStatus: 'Sinh đơn',
+        ivfStatus: 'Có',
         address: 'Hà Nội',
-        antibioticUse: 'Không', // có/không
-        breastfeeding: 'Có', // có/không
-        sampleCode: testResult.testCode,
+        antibioticUse: 'Không',
+        breastfeeding: 'Có',
         sampleCollectionDate: '03/05/2025',
-        sampleReceiptDate: '03/05/2025'
-      };
-    } else if (testResult.testCode === 'y12345679') {
-      return {
+        sampleReceiptDate: '03/05/2025',
+        doctorPhone: '0908 631 472'
+      },
+      'y12345679': {
         gender: 'Nữ',
-        gestationalAge: 39, // weeks
-        birthWeight: 3700, // grams
-        twinStatus: 'Sinh đơn', // đôi/đơn
-        ivfStatus: 'Có', // có/không
+        gestationalAge: 39,
+        birthWeight: 3700,
+        twinStatus: 'Sinh đơn',
+        ivfStatus: 'Có',
         address: 'Hà Nội',
-        antibioticUse: 'Không', // có/không
-        breastfeeding: 'Có', // có/không
-        sampleCode: testResult.testCode,
+        antibioticUse: 'Không',
+        breastfeeding: 'Có',
         sampleCollectionDate: '03/06/2025',
         sampleReceiptDate: '03/06/2025',
         doctorPhone: '0908 631 472'
-      };
-    }
-    // Default data for other tests
-    return {
+      },
+      'y12345680': {
+        gender: 'Nam',
+        gestationalAge: 38,
+        birthWeight: 2800,
+        twinStatus: 'Sinh đơn',
+        ivfStatus: 'Không',
+        address: 'Hà Nội',
+        antibioticUse: 'Không',
+        breastfeeding: 'Có',
+        sampleCollectionDate: '03/07/2025',
+        sampleReceiptDate: '03/07/2025',
+        doctorPhone: '0968 435 712'
+      },
+      'y12345681': {
+        gender: 'Nam',
+        gestationalAge: 38,
+        birthWeight: 3000,
+        twinStatus: 'Sinh đơn',
+        ivfStatus: 'Không',
+        address: 'Hà Nội',
+        antibioticUse: 'Không',
+        breastfeeding: 'Có',
+        sampleCollectionDate: '03/08/2025',
+        sampleReceiptDate: '03/08/2025',
+        doctorPhone: '0907 486 319'
+      },
+      'y12345682': {
+        gender: 'Nam',
+        gestationalAge: 38,
+        birthWeight: 3000,
+        twinStatus: 'Sinh đơn',
+        ivfStatus: 'Không',
+        address: 'Hà Nội',
+        antibioticUse: 'Không',
+        breastfeeding: 'Có',
+        sampleCollectionDate: '03/09/2025',
+        sampleReceiptDate: '03/09/2025',
+        doctorPhone: '0935 286 917'
+      },
+      'y12345683': {
+        gender: 'Nữ',
+        gestationalAge: 38,
+        birthWeight: 3200,
+        twinStatus: 'Sinh đơn',
+        ivfStatus: 'Không',
+        address: 'Hà Nội',
+        antibioticUse: 'Không',
+        breastfeeding: 'Có',
+        sampleCollectionDate: '03/10/2025',
+        sampleReceiptDate: '03/10/2025',
+        doctorPhone: '0904 182 735'
+      },
+      'y12345684': {
+        gender: 'Nữ',
+        gestationalAge: 38,
+        birthWeight: 3400,
+        twinStatus: 'Sinh đơn',
+        ivfStatus: 'Không',
+        address: 'Hà Nội',
+        antibioticUse: 'Không',
+        breastfeeding: 'Có',
+        sampleCollectionDate: '03/11/2025',
+        sampleReceiptDate: '03/11/2025',
+        doctorPhone: '0979 561 832'
+      }
+    };
+
+    return patientDataMap[testResult.testCode] || {
       gender: 'Nữ',
-      gestationalAge: 39, // weeks
-      birthWeight: 3800, // grams
-      twinStatus: 'Sinh đơn', // đôi/đơn
-      ivfStatus: 'Có', // có/không
+      gestationalAge: 39,
+      birthWeight: 3800,
+      twinStatus: 'Sinh đơn',
+      ivfStatus: 'Có',
       address: 'Hà Nội',
-      antibioticUse: 'Không', // có/không
-      breastfeeding: 'Có', // có/không
-      sampleCode: testResult.testCode,
+      antibioticUse: 'Không',
+      breastfeeding: 'Có',
       sampleCollectionDate: '03/05/2025',
-      sampleReceiptDate: '03/05/2025'
+      sampleReceiptDate: '03/05/2025',
+      doctorPhone: '0908 631 472'
     };
   };
 
@@ -166,13 +225,13 @@ export const TestResultDetails = ({ testResult, userRole }: TestResultDetailsPro
       - Địa chỉ: ${additionalPatientData.address}
       - Tình trạng dùng kháng sinh: ${additionalPatientData.antibioticUse}
       - Dùng sữa mẹ: ${additionalPatientData.breastfeeding}
-      - Mã số mẫu: ${additionalPatientData.sampleCode}
+      - Mã số mẫu: ${testResult.testCode}
       - Ngày lấy mẫu: ${additionalPatientData.sampleCollectionDate}
       - Ngày nhận mẫu: ${additionalPatientData.sampleReceiptDate}
       - Ngày xét nghiệm: ${testResult.testDate}
       - Ngày phân tích: ${testResult.analysisDate}
       - Số điện thoại: ${testResult.phone}
-      - Số điện thoại bác sĩ: ${additionalPatientData.doctorPhone || doctorPhone}
+      - Số điện thoại bác sĩ: ${additionalPatientData.doctorPhone}
       - Kết quả: ${testResult.result === 'positive' ? 'Dương tính' : 'Âm tính'}
       
       B. CHI TIẾT 77 CHỈ SỐ SINH HỌC:
@@ -420,7 +479,7 @@ export const TestResultDetails = ({ testResult, userRole }: TestResultDetailsPro
                   </div>
                   <div>
                     <span className="font-medium text-slate-700">Số điện thoại bác sĩ chỉ định:</span>
-                    <span className="ml-2">{additionalPatientData.doctorPhone || doctorPhone}</span>
+                    <span className="ml-2">{additionalPatientData.doctorPhone}</span>
                   </div>
                 </div>
               </div>
